@@ -16,6 +16,6 @@ Repositorio público que sirve de alojamiento de imágenes para programar posts 
 - Sin etiquetas ni nombre en las diapositivas; solo contador "N / 3" arriba a la derecha.
 - 1: gancho (pregunta o frase que toca un dolor). 2: pista breve, sin contarlo todo. 3: toca el dolor e invita a escribir ("Escríbeme por privado"). Sin lema salvo en el post de método.
 - Contenido dentro de la zona central (padding 190px arriba/abajo) para que se vea completo también en recorte cuadrado.
-- Pie de foto corto, sin hablar de su pasado, cierra con pregunta + #Huelva #pymes #empresarios.
+- Pie de foto corto y visual, sin hablar de su pasado: 1-2 líneas con un emoji al inicio cada una, línea en blanco, pregunta con "👉", línea en blanco, #Huelva #pymes #empresarios.
 - No prometer resultados ni inventar casos o cifras.
 - Mejor hora según Metricool: 10:00, lunes/miércoles/viernes.
