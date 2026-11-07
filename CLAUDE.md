@@ -36,3 +36,14 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 - Hueco libre en el centro: Alejandro añade la caja de preguntas desde el móvil (Metricool no puede poner stickers).
 - Después: ver quién respondió; Claude redacta el mensaje para cada uno y Alejandro decide si lo envía. Apuntar las respuestas (dolores con sus palabras) cada semana.
 - Imágenes en `historias/AAAA-MM-DD-dia.jpg`.
+
+## Que no parezca hecho con IA (desde el 7-nov, para todos los posts nuevos)
+- Nada de fondo plano liso: degradado con profundidad, luz difusa o viñeta suave, y grano fino (feTurbulence, opacidad 0.3-0.45) como en las historias.
+- Un elemento gráfico con intención por post (contorno de un símbolo, ondas, rejilla que se desvanece, raya de color), nunca adornos de plantilla (puntos, corchetes).
+- Variar la composición: no siempre el mismo bloque de título arriba a la izquierda; alternar título grande centrado, cifra o palabra gigante en contorno, frase partida en dos diapositivas.
+- Cuando se pueda, meter algo real: foto de Huelva, de un escritorio, de unas manos con papeles (fotos propias de Alejandro, nunca de bancos de imágenes que parezcan genéricas).
+- Mantener la paleta azul/negro y Montserrat; lo que cambia es la textura y la composición.
+
+## Referente: Pedro Buerbaum (analizado el 7-nov-2026)
+Copiar: ganchos cortos sobre un dolor concreto ("Ese descuento te está costando más de lo que crees"), un formato reconocible y repetido, mezcla de tipos de contenido, y que todo empuje a una acción concreta (él: webinar).
+No copiar: estilo de vida aspiracional ni autoridad basada en experiencia que Alejandro aún no tiene. Detalle en el doc del proyecto claude/referente-pedro-buerbaum.md.
