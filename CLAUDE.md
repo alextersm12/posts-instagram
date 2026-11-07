@@ -28,3 +28,11 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 - Domingo: propuesta de los 2 carruseles de la semana para aprobar.
 - Lunes: informe de la semana anterior + estudio de mejora + agenda de lo programado esta semana. Primer lunes de cada mes: además, estudio de competencia y revisión de estrategia.
 - Métrica principal: conversaciones con empresarios iniciadas desde Instagram. Seguidores y "me gusta" son secundarios.
+
+## Historias
+- 2 por semana: martes (encuesta) y miércoles (caja de preguntas). Es una prueba de 4 semanas; en la revisión de diciembre se ajustan los días según las conversaciones que generen.
+- 1080×1920. Martes: fondo negro con luz azul difusa, interrogación en contorno azul y rejilla que se desvanece. Miércoles: fondo azul en degradado con ondas finas negras. Ambos con grano fino. Plantilla: `historias/tools/render_story.py`.
+- Solo la pregunta (centrada en el empresario, no en Alejandro), raya de color y @alejandro.segura.asesor abajo. Sin subtítulos tipo "Vota", "Responde", "Cuéntamelo". Sin frases de filosofía por ahora.
+- Hueco libre en el centro: Alejandro añade la encuesta o la caja de preguntas desde el móvil (Metricool no puede poner stickers).
+- Encuesta del martes con 4 opciones. Después: ver quién votó/respondió; Claude redacta el mensaje para cada uno y Alejandro decide si lo envía. Apuntar los votos cada semana.
+- Imágenes en `historias/AAAA-MM-DD-dia.jpg`.
