@@ -9,7 +9,7 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 ## Marca personal (desde el 8-nov, manda sobre todo lo demás)
 - Base en el doc del proyecto claude/marca-personal.md: empezar ahora con 21 años, le encantan los números y las empresas, fracasar no es hacerlo mal, movimiento y libertad.
 - Tres tipos de contenido: criterio para empresarios / lo que estoy construyendo / opiniones con postura.
-- La materia prima sale de Alejandro (notas semanales). No inventar experiencias, casos ni cifras. Sin tono de misterio: puede hablar de sí mismo y de su edad. "Éxito" solo con hechos reales, nunca lujo aparente.
+- La materia prima sale de Alejandro (notas semanales). No inventar experiencias, casos ni cifras. Sin tono de misterio: puede hablar de sí mismo y de su camino, pero NUNCA mencionar su edad (no quiere que se sepa). "Éxito" solo con hechos reales, nunca lujo aparente.
 
 ## Flujo
 1. Alejandro pide un post sobre un tema (o se le propone en la rutina del domingo a partir de sus notas de la semana).
