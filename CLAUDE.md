@@ -14,7 +14,7 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 ## Flujo
 1. Alejandro pide un post sobre un tema (o se le propone en la rutina del domingo a partir de sus notas de la semana).
 2. Se enseña el borrador (3 diapositivas + pie de foto) y se espera su OK explícito.
-3. Se generan las imágenes (1080×1350, JPG) y se suben a `NN-tema/1.jpg`, `2.jpg`, `3.jpg` (NN = número correlativo; el último usado es 10).
+3. Se generan las imágenes (1080×1350, JPG) y se suben a `NN-tema/1.jpg`, `2.jpg`, `3.jpg` (NN = número correlativo; el último usado es 11).
 4. Se programan en Metricool (brand 7917252, Instagram) con las URLs
    `https://raw.githubusercontent.com/alextersm12/posts-instagram/main/NN-tema/N.jpg`.
    Nunca se publica sin su aprobación.
