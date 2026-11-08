@@ -9,13 +9,13 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 ## Flujo
 1. Alejandro pide un post sobre un tema (o se le propone en la rutina del domingo).
 2. Se enseña el borrador (3 diapositivas + pie de foto) y se espera su OK explícito.
-3. Se generan las imágenes (1080×1350, JPG) y se suben a `NN-tema/1.jpg`, `2.jpg`, `3.jpg` (NN = número correlativo; el último usado es 08).
+3. Se generan las imágenes (1080×1350, JPG) y se suben a `NN-tema/1.jpg`, `2.jpg`, `3.jpg` (NN = número correlativo; el último usado es 10).
 4. Se programan en Metricool (brand 7917252, Instagram) con las URLs
    `https://raw.githubusercontent.com/alextersm12/posts-instagram/main/NN-tema/N.jpg`.
    Nunca se publica sin su aprobación.
 
 ## Estilo
-- Carrusel de 3 diapositivas, un solo color por post. Portadas alternas en la cuadrícula: azul / negro (tablero de ajedrez). El último publicado (08-metodo) fue negro, así que el siguiente va en azul.
+- Carrusel de 3 diapositivas, un solo color por post. Portadas alternas en la cuadrícula: azul / negro (tablero de ajedrez). El último programado (10-proximo-cliente) es negro, así que el siguiente va en azul. Plantilla con textura: `tools/render_carrusel_textura.py`.
 - Azul eléctrico #1F4BFF, negro #0A0A0A, texto blanco; en posts azules la palabra destacada va en negro, en posts negros en azul. Tipografía Montserrat (500/700/800) — se obtiene de github.com/JulietaUla/Montserrat.
 - Sin etiquetas ni nombre en las diapositivas; solo contador "N / 3" arriba a la derecha, flecha "→" abajo a la derecha en 1 y 2, "Escríbeme por privado" en la 3.
 - 1: gancho (pregunta o frase que toca un dolor). 2: pista breve, sin contarlo todo. 3: toca el dolor e invita a escribir. Sin lema salvo en posts de método.
