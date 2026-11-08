@@ -50,6 +50,7 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 - Mantener la paleta azul/negro y Montserrat; lo que cambia es la textura y la composición.
 
 ## Referentes
+- Bert Negocios (8-nov): analizar empresas conocidas con sus números públicos (solo cifras verificables con fuente) y sacar una lección para una pyme; cifra grande como gancho. Detalle en claude/referente-bert-negocios.md.
 - John Prime @juan.prim21 (8-nov): serie con nombre propio, "Busco empresarios de [ciudad] para entrevistarlos", bio con promesa + prueba real. OJO: 09-delegar se parece demasiado a sus posts; reescribirlo desde una observación de Alejandro antes de publicarlo. Detalle en claude/referente-juan-prim.md.
 - José Elías (8-nov): frase entrecomillada fuerte como gancho, pregunta final "¿Con quién estás?" sobre dilemas de empresa, "Comenta PALABRA" para abrir conversaciones. Sin política ni lenguaje grosero. Detalle en claude/referente-jose-elias.md.
 
