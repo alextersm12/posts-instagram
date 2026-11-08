@@ -7,8 +7,8 @@ Alejandro Segura es **asesor estratégico global de pymes** (Huelva): estrategia
 NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes. Esos temas pueden aparecer, pero mezclados con estrategia, dirección, prioridades, equipo, ventas, crecimiento y toma de decisiones.
 
 ## Marca personal (desde el 8-nov, manda sobre todo lo demás)
-- Base en el doc del proyecto claude/marca-personal.md: empezar ahora con 21 años, le encantan los números y las empresas, fracasar no es hacerlo mal, movimiento y libertad.
-- Tres tipos de contenido: criterio para empresarios / lo que estoy construyendo / opiniones con postura.
+- Base en el doc del proyecto claude/marca-personal.md: asesor estratégico (no emprendedor) totalmente preparado por su capacidad de análisis y de decisión; le encantan los números y las empresas; fallar no es para rendirse (escalada, que practica); movimiento y libertad. No hablar de "aprender haciendo" ni de "empezar".
+- Tres tipos de contenido: criterio para empresarios / su forma de analizar y decidir / opiniones con postura.
 - La materia prima sale de Alejandro (notas semanales). No inventar experiencias, casos ni cifras. Sin tono de misterio: puede hablar de sí mismo y de su camino, pero NUNCA mencionar su edad (no quiere que se sepa). "Éxito" solo con hechos reales, nunca lujo aparente.
 
 ## Flujo
@@ -48,6 +48,9 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 - Variar la composición: no siempre el mismo bloque de título arriba a la izquierda; alternar título grande centrado, cifra o palabra gigante en contorno, frase partida en dos diapositivas.
 - Cuando se pueda, meter algo real: foto de Huelva, de un escritorio, de unas manos con papeles (fotos propias de Alejandro, nunca de bancos de imágenes que parezcan genéricas).
 - Mantener la paleta azul/negro y Montserrat; lo que cambia es la textura y la composición.
+
+## Referentes
+- José Elías (8-nov): frase entrecomillada fuerte como gancho, pregunta final "¿Con quién estás?" sobre dilemas de empresa, "Comenta PALABRA" para abrir conversaciones. Sin política ni lenguaje grosero. Detalle en claude/referente-jose-elias.md.
 
 ## Referente: Pedro Buerbaum (analizado el 7-nov-2026)
 Copiar: ganchos cortos sobre un dolor concreto ("Ese descuento te está costando más de lo que crees"), un formato reconocible y repetido, mezcla de tipos de contenido, y que todo empuje a una acción concreta (él: webinar).
