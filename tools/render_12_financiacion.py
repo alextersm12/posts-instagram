@@ -65,7 +65,7 @@ slides = [
                    "Business angels: inversores particulares.",
                    "Crowdfunding: muchas personas aportan poco."],
                   "Más capital", "Compartes decisiones",
-                  extra=f'<p style="margin:36px 0 0;font-size:38px;font-weight:700;line-height:1.3">Yo también invierto en {K}pymes e ideas</span>. Si tu proyecto tiene números detrás, hablamos.</p>')),
+                  extra=f'<p style="margin:36px 0 0;font-size:38px;font-weight:700;line-height:1.3">¿Buscas socio? Antes de meter dinero, alguien tiene que {K}mirar los números</span>.</p>')),
     page(4, lista("3 · AYUDAS PÚBLICAS", f"Dinero que no se {K}devuelve</span>.",
                   ["Tarifa plana: 80 €/mes de cuota el primer año.",
                    "Cuota cero (Andalucía): la Junta te devuelve esos 80 €, si la convocatoria está abierta.",
