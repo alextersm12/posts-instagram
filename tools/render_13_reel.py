@@ -25,7 +25,7 @@ def prepare(voice):
         for d in EST:
             S.append(t)
             t += d
-        return S, t + TAIL, None
+        return S, t + TAIL, None, [[0, d * .33, d * .66] for d in EST]
     x = load_pcm(voice)
     out = subprocess.run(["ffmpeg", "-i", voice, "-af", "silencedetect=noise=-38dB:d=0.18", "-f", "null", "-"],
                          capture_output=True, text=True).stderr
@@ -38,25 +38,36 @@ def prepare(voice):
         cur = b
     if len(x) / SR - cur > 0.1:
         chunks.append([cur, len(x) / SR])
-    # unir por las pausas más cortas hasta quedarnos con N frases
-    while len(chunks) > N:
+    if len(chunks) == 12:  # toma de ElevenLabs con una pausa entre cada frase corta
+        groups = [[0], [1], [2, 3, 4], [5, 6], [7, 8], [9], [10, 11]]
+    else:
+        groups = None
+    # si no, unir por las pausas más cortas hasta quedarnos con N frases
+    while groups is None and len(chunks) > N:
         gaps = [chunks[i + 1][0] - chunks[i][1] for i in range(len(chunks) - 1)]
         i = int(np.argmin(gaps))
         chunks[i] = [chunks[i][0], chunks[i + 1][1]]
         del chunks[i + 1]
-    if len(chunks) < N:
-        sys.exit(f"Solo {len(chunks)} frases detectadas; se esperaban {N}")
-    pieces, S, t = [np.zeros(int(LEAD * SR), np.float32)], [], LEAD
-    for a, b in chunks:
-        a, b = max(0, a - 0.04), b + 0.06
+    if groups is None:
+        if len(chunks) < N:
+            sys.exit(f"Solo {len(chunks)} frases detectadas; se esperaban {N}")
+        groups = [[i] for i in range(N)]
+    pieces, S, Dsub, t = [np.zeros(int(LEAD * SR), np.float32)], [], [], LEAD
+    for g in groups:
         S.append(t - 0.05)
-        seg = x[int(a * SR):int(b * SR)]
-        pieces += [seg, np.zeros(int(GAP * SR), np.float32)]
-        t += len(seg) / SR + GAP
+        Dsub.append([])
+        for j, k in enumerate(g):
+            a, b = chunks[k]
+            a, b = max(0, a - 0.04), b + 0.06
+            Dsub[-1].append(t - S[-1])
+            seg = x[int(a * SR):int(b * SR)]
+            gap = GAP if j == len(g) - 1 else 0.12
+            pieces += [seg, np.zeros(int(gap * SR), np.float32)]
+            t += len(seg) / SR + gap
     os.makedirs(WORK, exist_ok=True)
     path = f"{WORK}/voz.wav"
     write_wav(path, np.concatenate(pieces))
-    return S, t + TAIL, path
+    return S, t + TAIL, path, Dsub
 
 
 HTML = r"""<html><head><style>
@@ -77,7 +88,7 @@ body{margin:0;background:#000}
 <div class="bg" id="flash" style="background:#fff;opacity:0"></div>
 </div>
 <script>
-const S=%(S)s, TOTAL=%(TOTAL)s;
+const S=%(S)s, TOTAL=%(TOTAL)s, DS=%(DS)s;
 const cl=x=>Math.max(0,Math.min(1,x)), oc=p=>1-Math.pow(1-p,3), ob=p=>{const c1=1.9,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2)};
 const link=(cx,cy,rot,w,h,sw,col,op,dash='')=>`<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="none" stroke="${col}" stroke-width="${sw}" opacity="${op}" ${dash} transform="rotate(${rot} ${cx} ${cy})"/>`;
 function chain(dy){let s='';for(let i=0;i<6;i++){const x=40+i*215,y=1520-i*80+dy;s+=link(x,y,-20,300,i%%2?120:150,i%%2?20:24,i%%2?'#fff':'#0A0A0A',.92)}return `<svg width="1080" height="1920" style="position:absolute;left:0;top:0">${s}</svg>`}
@@ -105,13 +116,13 @@ function render(t){
   it(`<div style="font-size:66px;font-weight:700;line-height:1.15;opacity:.6">Montaste un negocio<br>para ser libre.</div>`,90,420,'none',0);
   it(`<div style="font-size:140px;font-weight:800;line-height:.98;letter-spacing:-.035em">¿Y ahora<br>eres su<br><span class="k">esclavo</span>?</div>`,90,640,'slam',.15)}
  if(s==2||s==3){const base=s==2?lt:S[3]-S[2]+lt;const sp=s==2?60:60+260*lt;const rot=(s==2?base*50:(S[3]-S[2])*50+lt*sp)%%360;
-  const p=s==2?[cl(lt/(D*.25)),cl((lt-D*.33)/(D*.25)),cl((lt-D*.66)/(D*.25))]:[1,1,1];
+  const p=s==2?[0,1,2].map(i=>cl((lt-(DS[2][i]??D*i*.33)+.05)/.3)):[1,1,1];
   h+=loop(rot,p);
   it(`<div style="font-size:96px;font-weight:800;line-height:1.02;letter-spacing:-.02em">${s==2?'Todos los días,<br>lo mismo.':'Y mañana…<br><span class="k">igual</span>.'}</div>`,90,330,s==2?'pop':'slam',0);
   if(s==3)kick(.2)}
- if(s==4){black=true;kick(0);kick(D*.45);
+ if(s==4){black=true;const sb=DS[4][1]??D*.45;kick(0);kick(sb);
   it(`<div style="font-size:150px;font-weight:800;line-height:1;letter-spacing:-.03em">Ya no<br>decides.</div>`,90,520,'slam',0);
-  it(`<div style="font-size:170px;font-weight:800;line-height:1;letter-spacing:-.03em" class="b">Sobrevives.</div>`,90,900,'slam',D*.45)}
+  it(`<div style="font-size:170px;font-weight:800;line-height:1;letter-spacing:-.03em" class="b">Sobrevives.</div>`,90,900,'slam',sb)}
  if(s==5){const q=oc(cl(lt/1.2));const sc=1.6-1.15*q;
   h+=`<div style="position:absolute;inset:0;transform:scale(${sc}) translateY(${q*260}px);transform-origin:540px 1050px;opacity:${.35+.65*q}">${loop(lt*120,[1,1,1])}</div>`;
   it(`<div style="font-size:92px;font-weight:800;line-height:1.05;letter-spacing:-.02em">Salir del bucle<br>empieza por<br>mirarlo <span class="k">desde fuera</span>.</div>`,90,300,'pop',.2)}
@@ -168,12 +179,12 @@ def sfx(S, total):
     return out
 
 
-async def frames(S, total):
+async def frames(S, total, DS):
     os.makedirs(WORK, exist_ok=True)
     for f in os.listdir(WORK):
         if f.endswith(".jpg"):
             os.remove(os.path.join(WORK, f))
-    open(f"{WORK}/reel.html", "w").write(HTML % {"F": F, "S": json.dumps(S), "TOTAL": total})
+    open(f"{WORK}/reel.html", "w").write(HTML % {"F": F, "S": json.dumps(S), "TOTAL": total, "DS": json.dumps(DS)})
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--allow-file-access-from-files"])
         pg = await b.new_page(viewport={"width": 1080, "height": 1920})
@@ -186,9 +197,9 @@ async def frames(S, total):
 
 
 def main():
-    S, total, voice = prepare(sys.argv[1] if len(sys.argv) > 1 else None)
+    S, total, voice, DS = prepare(sys.argv[1] if len(sys.argv) > 1 else None)
     print("escenas:", [round(x, 2) for x in S], "total:", round(total, 2))
-    asyncio.run(frames(S, total))
+    asyncio.run(frames(S, total, DS))
     write_wav(f"{WORK}/sfx.wav", sfx(S, total))
     out = os.path.join(ROOT, "13-esclavo", "reel.mp4")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", f"{WORK}/f%05d.jpg", "-i", f"{WORK}/sfx.wav"]
