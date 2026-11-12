@@ -14,7 +14,8 @@ FPS = 30
 SR = 44100
 F = "/tmp/mont/fonts/ttf/"
 EST = [2.0, 1.8, 2.4, 3.6, 2.4, 3.4, 3.4, 2.4, 3.0, 2.0]  # duraciones estimadas por frase
-TAIL = 1.4  # segundos de cierre tras la última frase
+TAIL = 0.9  # pausa tras la última frase antes del cierre
+END = 3.6  # duración de la escena final (llamada a la acción, sin voz)
 
 
 GROUPS = [[0], [1], [2, 3], [4, 5], [6, 7], [8, 9, 10], [11, 12, 13], [14, 15], [16], [17]]  # frases de voz por escena
@@ -37,7 +38,9 @@ def prepare(voice):
             st.append(t)
             D.append([0, d * .45, d * .7])
             t += d
-        return st, t + TAIL, None, D
+        st.append(t + TAIL)
+        D.append([0])
+        return st, st[-1] + END, None, D
     x = load_pcm(voice)
     out = subprocess.run(["ffmpeg", "-i", voice, "-af", "silencedetect=noise=-35dB:d=0.28", "-f", "null", "-"],
                          capture_output=True, text=True).stderr
@@ -70,7 +73,9 @@ def prepare(voice):
     path = f"{WORK}/voz.wav"
     os.makedirs(WORK, exist_ok=True)
     write_wav(path, v * 1.0)
-    return S, t + TAIL, path, D
+    S.append(t + TAIL)
+    D.append([0])
+    return S, S[-1] + END, path, D
 
 
 HTML = r"""<html><head><style>
@@ -127,10 +132,15 @@ const SC=[
   [`<svg width="1080" height="420" id="track"></svg>`,0,880,'none',0],
   [`<div style="font-size:84px;font-weight:800">…abandona en la <span class="b">C</span>.</div>`,90,1330,'slam',1.55]],
  [[`<div style="font-size:170px;font-weight:800;line-height:1;letter-spacing:-.03em">Empieza<br>por la <span class="k">A</span>.</div>`,90,420,'slam',0],
-  [`<div id="steps"></div>`,0,0,'none',0],
-  [`<div style="font-size:46px;font-weight:800">Escríbeme por privado <span class="k">→</span></div>`,90,1640,'pop',1.0]]];
-const blackScenes=new Set([7,8]);
-const shakeAt=[[0,.75],[1,0],[3,.05],[4,.05],[5,.05],[6,.05],[7,0],[8,1.15],[9,0]];
+  [`<div id="steps"></div>`,0,0,'none',0]],
+ [[`<div style="font-size:1400px;font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:6px #1F4BFF;opacity:.45">A</div>`,120,380,'zoom',0],
+  [`<div style="font-size:150px;font-weight:800;line-height:1;letter-spacing:-.03em">¿Cuál es<br>tu <span class="b">A</span>?</div>`,90,470,'slam',0],
+  [`<div style="font-size:60px;font-weight:700;line-height:1.25">Escríbeme</div>`,90,900,'pop',.7],
+  [`<div style="background:#1F4BFF;padding:22px 44px;border-radius:999px;font-size:110px;font-weight:800;letter-spacing:.04em;box-shadow:0 0 80px #1F4BFFaa">PLAN</div>`,90,1000,'slam',1.0],
+  [`<div style="font-size:60px;font-weight:700;line-height:1.25">por privado y lo vemos.</div>`,90,1230,'pop',1.4],
+  [`<svg width="150" height="150" viewBox="0 0 24 24"><path d="M22 3 2 10.5l7.5 3L13 21z M9.5 13.5 22 3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`,840,1210,'spin',1.6]]];
+const blackScenes=new Set([7,8,10]);
+const shakeAt=[[0,.75],[1,0],[3,.05],[4,.05],[5,.05],[6,.05],[7,0],[8,1.55],[9,0],[10,0],[10,1.0]];
 let cur=-1;
 function trackSVG(p){ // p 0..1 progreso de la escena 8
  const xs=[150,390,630],L="ABC";let s='';
@@ -232,6 +242,12 @@ def sfx_track(S, total):
             put(thud, st + .05)
             for k in range(3):
                 put(pop, st + .2 + k * .18)
+        elif i == 10:
+            put(thud, st + .05)
+            put(pop, st + .7)
+            put(thud, st + 1.0)
+            put(pop, st + 1.4)
+            put(tone(600, 1200, .25, .4, 6), st + 1.6)
     # base rítmica suave a 110 bpm
     beat = 60 / 110
     kick, hat = tone(90, 40, .25, .55, 14), np.random.default_rng(2).normal(0, .06, int(SR * .04)) * np.exp(-np.linspace(0, 6, int(SR * .04)))
