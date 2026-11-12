@@ -1,4 +1,5 @@
-"""Historia martes 17-nov (estilo martes de render_story.py). Ejecutar desde la raíz del repo."""
+"""Historias martes 17-nov y jueves 19-nov con llamada a la acción (se publican solas desde Metricool,
+así que la CTA va en la imagen: respuesta por mensaje privado). Ejecutar desde la raíz del repo."""
 import asyncio
 from playwright.async_api import async_playwright
 F="/tmp/mont/fonts/ttf/"
@@ -25,16 +26,36 @@ martes_bg = """
 <div style="position:absolute;right:-300px;bottom:-330px;font-size:1700px;font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:4px #1F4BFF;opacity:.55">?</div>
 """ + GRAIN.format(o=.35)
 
+# MIÉRCOLES (azul): degradado con profundidad + ondas finas concéntricas + grano
+rings="".join(f'<div style="position:absolute;width:{d}px;height:{d}px;border-radius:50%;border:{w}px solid #0A0A0A;opacity:{op};right:{-d//2+60}px;bottom:{-d//2+60}px"></div>'
+              for d,w,op in [(360,30,.85),(620,3,.45),(860,3,.32),(1100,3,.22),(1340,3,.14),(1580,3,.08)])
+miercoles_bg = f"""
+<div style="position:absolute;inset:0;background:linear-gradient(160deg,#3A62FF 0%,#1F4BFF 45%,#1636C9 100%)"></div>
+<div style="position:absolute;inset:0;background:radial-gradient(800px 700px at 15% 10%,#ffffff22,transparent 70%)"></div>
+{rings}
+""" + GRAIN.format(o=.45)
 
-T='Si mañana te fueras una semana, ¿qué se <span style="color:#1F4BFF">rompería</span> primero en tu negocio?'
-html=page(martes_bg,"#1F4BFF","#C9CDD8",T,"").replace("font-size:116px","font-size:100px")
+
+def cta(txt, bg, fg):
+    return (f'<div style="position:absolute;left:96px;right:96px;bottom:330px;display:flex;align-items:center;gap:24px">'
+            f'<div style="background:{bg};color:{fg};padding:26px 40px;border-radius:999px;font-size:44px;font-weight:800;white-space:nowrap">{txt}</div>'
+            f'<div style="font-size:70px">👇</div></div>')
+items = {
+ "historias/2026-11-17-martes.jpg": page(martes_bg,"#1F4BFF","#C9CDD8",
+    'Si mañana te fueras una semana, ¿qué se <span style="color:#1F4BFF">rompería</span> primero en tu negocio?',"")
+    .replace("font-size:116px","font-size:100px").replace("</div></body>", cta("Respóndeme a esta historia","#1F4BFF","#fff")+"</div></body>"),
+ "historias/2026-11-19-jueves.jpg": page(miercoles_bg,"#0A0A0A","#E6EBFF",
+    '¿Cuántas horas a la semana son de verdad <span style="color:#0A0A0A">para&nbsp;ti</span>?',"")
+    .replace("font-size:116px","font-size:100px").replace("</div></body>", '<div style="position:absolute;left:96px;right:96px;top:1060px;font-size:44px;font-weight:700;line-height:1.3;color:#E6EBFF">Para ti, tu familia, tus amigos.<br>No para el negocio.</div>'+cta("Respóndeme con un número","#0A0A0A","#fff")+"</div></body>"),
+}
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(executable_path="/usr/bin/google-chrome",args=["--allow-file-access-from-files"])
         pg=await b.new_page(viewport={"width":1080,"height":1920})
-        open("/tmp/h17.html","w").write(html)
-        await pg.goto("file:///tmp/h17.html"); await pg.evaluate("document.fonts.ready"); await pg.wait_for_timeout(400)
-        await pg.screenshot(path="historias/2026-11-17-martes.jpg",type="jpeg",quality=92)
+        for path,h in items.items():
+            open("/tmp/hcta.html","w").write(h)
+            await pg.goto("file:///tmp/hcta.html"); await pg.evaluate("document.fonts.ready"); await pg.wait_for_timeout(400)
+            await pg.screenshot(path=path,type="jpeg",quality=92)
         await b.close()
 asyncio.run(main())
 print("ok")
