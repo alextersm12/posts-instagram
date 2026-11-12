@@ -3,7 +3,7 @@ Uso: python3 tools/render_13_reel.py [voz.mp3]
   - Con voz: corta por silencios, junta las frases hasta tener 7 (una por escena) uniendo las pausas más cortas,
     las recompone con pausas breves y sincroniza cada escena.
   - Sin voz: duraciones estimadas.
-Salida: 13-esclavo/reel.mp4
+Salida: 13-esclavo/reel-esclavo.mp4
 Reutiliza utilidades de tools/render_12_reel.py."""
 import asyncio, json, os, re, subprocess, sys
 import numpy as np
@@ -201,7 +201,7 @@ def main():
     print("escenas:", [round(x, 2) for x in S], "total:", round(total, 2))
     asyncio.run(frames(S, total, DS))
     write_wav(f"{WORK}/sfx.wav", sfx(S, total))
-    out = os.path.join(ROOT, "13-esclavo", "reel.mp4")
+    out = os.path.join(ROOT, "13-esclavo", "reel-esclavo.mp4")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", f"{WORK}/f%05d.jpg", "-i", f"{WORK}/sfx.wav"]
     if voice:
         cmd += ["-i", voice, "-filter_complex", "[1:a]volume=0.4[s];[2:a]volume=1.5[v];[s][v]amix=inputs=2:duration=first:normalize=0[a]",

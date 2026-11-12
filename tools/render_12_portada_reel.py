@@ -21,6 +21,6 @@ async def m():
     b=await p.chromium.launch(executable_path="/usr/bin/google-chrome",args=["--allow-file-access-from-files"])
     pg=await b.new_page(viewport={"width":1080,"height":1920}); open('/tmp/cover.html','w').write(html)
     await pg.goto("file:///tmp/cover.html"); await pg.evaluate("document.fonts.ready"); await pg.wait_for_timeout(200)
-    await pg.screenshot(path="/home/claude/posts-instagram/12-financiacion/portada-reel.jpg",type="jpeg",quality=90)
+    await pg.screenshot(path="/home/claude/posts-instagram/12-financiacion/portada-reel-financiacion.jpg",type="jpeg",quality=90)
     await b.close()
 asyncio.run(m())

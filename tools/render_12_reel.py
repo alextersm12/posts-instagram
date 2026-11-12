@@ -2,7 +2,7 @@
 Uso: python3 tools/render_12_reel.py [voz.mp3]
   - Con voz: corta las frases por silencios, las junta con pausas cortas y ajusta cada escena y tarjeta a su frase.
   - Sin voz: usa duraciones estimadas.
-Salida: 12-financiacion/reel.mp4
+Salida: 12-financiacion/reel-financiacion.mp4
 Requiere Montserrat en /tmp/mont/fonts/ttf, ffmpeg y Playwright con Chrome."""
 import asyncio, json, os, re, subprocess, sys, wave
 import numpy as np
@@ -18,7 +18,12 @@ TAIL = 0.9  # pausa tras la última frase antes del cierre
 END = 3.6  # duración de la escena final (llamada a la acción, sin voz)
 
 
-GROUPS = [[0], [1], [2, 3], [4, 5], [6, 7], [8, 9, 10], [11, 12, 13], [14, 15], [16], [17]]  # frases de voz por escena
+# Frases de voz por escena según la toma (por número de trozos detectados). Una sublista = trozos que se
+# juntan en una sola frase conservando su pausa natural.
+GROUPS_BY_COUNT = {
+    18: [[0], [1], [2, 3], [4, 5], [6, 7], [8, 9, 10], [11, 12, 13], [14, 15], [16], [17]],  # Speechma (Álvaro)
+    21: [[0], [1], [2, 3], [[4, 5], 6], [[7, 8], 9], [[10, 11], 12], [[13, 14], 15], [16, 17], [[18, 19]], [20]],  # ElevenLabs (Rafa N)
+}
 LEAD, GAP_IN, GAP_SCENE = 0.4, 0.18, 0.32
 
 
@@ -53,14 +58,15 @@ def prepare(voice):
         cur = b
     if len(x) / SR - cur > 0.1:
         chunks.append((cur, len(x) / SR))
-    if len(chunks) != sum(len(g) for g in GROUPS):
-        sys.exit(f"Se detectaron {len(chunks)} frases y se esperaban {sum(len(g) for g in GROUPS)}: revisa el audio o GROUPS")
+    if len(chunks) not in GROUPS_BY_COUNT:
+        sys.exit(f"Se detectaron {len(chunks)} trozos de voz; añade su reparto en GROUPS_BY_COUNT")
+    GROUPS = GROUPS_BY_COUNT[len(chunks)]
     pieces, S, D, t = [np.zeros(int(LEAD * SR), np.float32)], [], [], LEAD
     for g in GROUPS:
         S.append(t - 0.06)
         D.append([])
         for j, k in enumerate(g):
-            a, b = chunks[k]
+            a, b = (chunks[k[0]][0], chunks[k[-1]][1]) if isinstance(k, list) else chunks[k]
             a, b = max(0, a - 0.04), b + 0.06
             D[-1].append(t - S[-1])
             seg = x[int(a * SR):int(b * SR)]
@@ -125,8 +131,8 @@ const SC=[
  forma('01','SIN PEDIR A NADIE','Empieza con lo que <span class="k">tienes</span>.','monedas',['Ahorra.','Empieza pequeño.','Cobra por adelantado.'],[D[3][1],D[3][1]+.55,D[3][1]+1.3]),
  forma('02','SOCIO O INVERSOR','Alguien que pone <span class="k">dinero</span>.','personas',['Un socio que entra.','Un inversor.','Business angels o crowdfunding.'],[D[4][0]+.7,D[4][0]+1.3,D[4][0]+1.8],
    [[`<div style="display:flex;gap:18px;font-size:40px;font-weight:800"><span style="background:#0A0A0A;padding:16px 28px;border-radius:999px">+ Más capital</span><span style="border:4px solid #0A0A0A;padding:12px 28px;border-radius:999px">− Compartes decisiones</span></div>`,90,1300,'pop',D[4][1]]]),
- forma('03','AYUDAS PÚBLICAS','Dinero que no se <span class="k">devuelve</span>.','documento',['Tarifa plana: 80 €/mes.','Cuota cero, si se convoca.','Capitalizar el paro.'],[D[5][1],D[5][2],D[5][2]+1.3]),
- forma('04','PRÉSTAMOS','Deuda, pero con <span class="k">ayuda</span>.','banco',['Microcréditos sin aval.','ENISA si eres joven (-40).'],[D[6][2],D[6][2]+1.4]),
+ forma('03','AYUDAS PÚBLICAS','Dinero que no se <span class="k">devuelve</span>.','documento',['Tarifa plana: 80 €/mes.','Cuota cero, si se convoca.','Capitalizar el paro.'],[D[5][1],(D[5][2]??D[5][1]+1.0),(D[5][2]??D[5][1]+1.0)+1.3]),
+ forma('04','PRÉSTAMOS','Deuda, pero con <span class="k">ayuda</span>.','banco',['Microcréditos sin aval.','ENISA si eres joven (-40).'],[(D[6][2]??D[6][1]),(D[6][2]??D[6][1])+1.4]),
  [[`<div style="font-size:170px;font-weight:800;line-height:1;letter-spacing:-.03em">Ninguna<br>sirve sin<br>un <span class="b">plan</span>.</div>`,90,620,'slam',0]],
  [[`<div style="font-size:84px;font-weight:800;line-height:1.08">Quien quiere llegar<br>a la <span class="b">Z</span> de golpe…</div>`,90,520,'pop',0],
   [`<svg width="1080" height="420" id="track"></svg>`,0,880,'none',0],
@@ -293,7 +299,7 @@ def main():
     print("escenas:", [round(x, 2) for x in S], "total:", round(total, 2))
     asyncio.run(frames(S, total, D))
     write_wav(f"{WORK}/sfx.wav", sfx_track(S, total))
-    out = os.path.join(ROOT, "12-financiacion", "reel.mp4")
+    out = os.path.join(ROOT, "12-financiacion", "reel-financiacion.mp4")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", f"{WORK}/f%05d.jpg", "-i", f"{WORK}/sfx.wav"]
     if voice:
         cmd += ["-i", voice, "-filter_complex",

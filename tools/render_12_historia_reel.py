@@ -16,7 +16,7 @@ body{{margin:0}}</style></head><body><div style="position:relative;overflow:hidd
  <p style="margin:30px 0 0;font-size:44px;font-weight:500;line-height:1.3;color:#E6EBFF">4 formas de financiar tu negocio en 40 segundos.</p>
 </div>
 <div style="position:absolute;left:50%;top:760px;width:520px;margin-left:-260px;transform:rotate(-4deg);box-shadow:0 40px 90px #000a;border-radius:18px;overflow:hidden">
- <img src="file://{ROOT}/12-financiacion/portada-reel.jpg" style="width:520px;display:block">
+ <img src="file://{ROOT}/12-financiacion/portada-reel-financiacion.jpg" style="width:520px;display:block">
  <div style="position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;background:#ffffffe6;display:flex;align-items:center;justify-content:center"><div style="width:0;height:0;border-left:56px solid #1F4BFF;border-top:34px solid transparent;border-bottom:34px solid transparent;margin-left:14px"></div></div>
 </div>
 <div style="position:absolute;bottom:220px;left:0;width:1080px;text-align:center;font-size:44px;font-weight:800">Lo tienes en mi perfil <span style="color:#0A0A0A">↓</span></div>
