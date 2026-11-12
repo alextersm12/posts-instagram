@@ -1,4 +1,4 @@
-"""Historias martes 17-nov y jueves 19-nov con llamada a la acción (se publican solas desde Metricool,
+"""Historias martes 17, jueves 19 y viernes 20-nov con llamada a la acción (se publican solas desde Metricool,
 así que la CTA va en la imagen: respuesta por mensaje privado). Ejecutar desde la raíz del repo."""
 import asyncio
 from playwright.async_api import async_playwright
@@ -44,6 +44,9 @@ items = {
  "historias/2026-11-17-martes.jpg": page(martes_bg,"#1F4BFF","#C9CDD8",
     'Si mañana te fueras una semana, ¿qué se <span style="color:#1F4BFF">rompería</span> primero en tu negocio?',"")
     .replace("font-size:116px","font-size:100px").replace("</div></body>", cta("Respóndeme a esta historia","#1F4BFF","#fff")+"</div></body>"),
+ "historias/2026-11-20-viernes.jpg": page(martes_bg,"#1F4BFF","#C9CDD8",
+    'Si mañana te propongo un plan un martes a las 11, ¿podrías venir… o tu negocio <span style="color:#1F4BFF">no te deja</span>?',"")
+    .replace("font-size:116px","font-size:94px").replace("</div></body>", cta("Respóndeme: sí o no","#1F4BFF","#fff")+"</div></body>"),
  "historias/2026-11-19-jueves.jpg": page(miercoles_bg,"#0A0A0A","#E6EBFF",
     '¿Cuántas horas a la semana son de verdad <span style="color:#0A0A0A">para&nbsp;ti</span>?',"")
     .replace("font-size:116px","font-size:100px").replace("</div></body>", '<div style="position:absolute;left:96px;right:96px;top:1060px;font-size:44px;font-weight:700;line-height:1.3;color:#E6EBFF">Para ti, tu familia, tus amigos.<br>No para el negocio.</div>'+cta("Respóndeme con un número","#0A0A0A","#fff")+"</div></body>"),
