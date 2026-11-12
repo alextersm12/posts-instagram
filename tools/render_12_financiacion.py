@@ -108,12 +108,12 @@ s3 = forma(3, "02", "SOCIO O INVERSOR", f"Alguien que pone {K}dinero</span>.", "
            extra=f'<p style="margin:30px 0 0;font-size:36px;font-weight:700;line-height:1.3">¿Buscas socio? Antes de meter dinero, alguien tiene que {K}mirar los números</span>.</p>')
 s4 = forma(4, "03", "AYUDAS PÚBLICAS", f"Dinero que no se {K}devuelve</span>.", "documento",
            ["Tarifa plana: 80 €/mes de cuota el primer año.",
-            "Cuota cero (Andalucía): la Junta te devuelve esos 80 €, si está abierta.",
+            "Cuota cero (Andalucía): la Junta te devuelve esos 80 € cuando abre convocatoria.",
             "Capitalizar el paro: cobras de golpe lo que te queda."],
            "No se devuelve", "Requisitos y plazos")
 s5 = forma(5, "04", "PRÉSTAMOS", f"Deuda, pero con {K}ayuda</span>.", "banco",
            ["Microcréditos sin aval (MicroBank).",
-            "ENISA Jóvenes: préstamo público para SL.",
+            "ENISA Jóvenes: préstamo público para sociedades.",
             "Banco con aval de Garántia (Andalucía)."],
            "Dinero rápido", "Hay que devolverlo")
 
