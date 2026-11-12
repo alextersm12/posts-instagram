@@ -1,6 +1,6 @@
 """Reel 12-financiacion (1080x1920, 30 fps): animación dinámica sincronizada con la voz en off.
 Uso: python3 tools/render_12_reel.py [voz.mp3]
-  - Con voz: detecta los silencios para cortar las 10 frases y ajusta cada escena a su frase.
+  - Con voz: corta las frases por silencios, las junta con pausas cortas y ajusta cada escena y tarjeta a su frase.
   - Sin voz: usa duraciones estimadas.
 Salida: 12-financiacion/reel.mp4
 Requiere Montserrat en /tmp/mont/fonts/ttf, ffmpeg y Playwright con Chrome."""
@@ -11,37 +11,66 @@ from playwright.async_api import async_playwright
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 WORK = "/tmp/reel12"
 FPS = 30
+SR = 44100
 F = "/tmp/mont/fonts/ttf/"
 EST = [2.0, 1.8, 2.4, 3.6, 2.4, 3.4, 3.4, 2.4, 3.0, 2.0]  # duraciones estimadas por frase
 TAIL = 1.4  # segundos de cierre tras la última frase
 
 
-def scene_starts(voice):
-    """Devuelve (inicios de escena, duración total, inicio de la voz)."""
+GROUPS = [[0], [1], [2, 3], [4, 5], [6, 7], [8, 9, 10], [11, 12, 13], [14, 15], [16], [17]]  # frases de voz por escena
+LEAD, GAP_IN, GAP_SCENE = 0.4, 0.18, 0.32
+
+
+def load_pcm(path):
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
+                         capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.int16).astype(np.float32) / 32768
+
+
+def prepare(voice):
+    """Devuelve (inicios de escena, duración total, voz recompuesta o None, D).
+    D[s] = segundos (desde el inicio de la escena s) en que empieza cada frase de esa escena.
+    Con voz: se cortan las frases por silencios y se recomponen con pausas cortas (más ritmo)."""
     if not voice:
-        st, t = [], 0.4
+        st, t, D = [], LEAD, []
         for d in EST:
             st.append(t)
+            D.append([0, d * .45, d * .7])
             t += d
-        return st, t + TAIL, 0.4
+        return st, t + TAIL, None, D
+    x = load_pcm(voice)
     out = subprocess.run(["ffmpeg", "-i", voice, "-af", "silencedetect=noise=-35dB:d=0.28", "-f", "null", "-"],
                          capture_output=True, text=True).stderr
-    ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", out)]
-    starts_sil = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", out)]
-    dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", voice],
-                               capture_output=True, text=True).stdout)
-    # comienzos de frase = final de cada silencio (más el arranque si no empieza en silencio)
-    phrase = ([0.0] if not starts_sil or starts_sil[0] > 0.05 else []) + ends
-    phrase = [p for p in phrase if p < dur - 0.3]
-    if len(phrase) != len(EST):
-        print(f"AVISO: {len(phrase)} frases detectadas (esperadas {len(EST)}); se reparten proporcionalmente")
-        tot = sum(EST)
-        phrase, acc = [], 0.0
-        for d in EST:
-            phrase.append(acc * dur / tot)
-            acc += d
-    off = 0.4
-    return [p + off - 0.08 for p in phrase], dur + off + TAIL, off
+    ss = [float(v) for v in re.findall(r"silence_start: ([\d.]+)", out)]
+    se = [float(v) for v in re.findall(r"silence_end: ([\d.]+)", out)]
+    chunks, cur = [], 0.0
+    for a, b in zip(ss, se):
+        if a - cur > 0.05:
+            chunks.append((cur, a))
+        cur = b
+    if len(x) / SR - cur > 0.1:
+        chunks.append((cur, len(x) / SR))
+    if len(chunks) != sum(len(g) for g in GROUPS):
+        sys.exit(f"Se detectaron {len(chunks)} frases y se esperaban {sum(len(g) for g in GROUPS)}: revisa el audio o GROUPS")
+    pieces, S, D, t = [np.zeros(int(LEAD * SR), np.float32)], [], [], LEAD
+    for g in GROUPS:
+        S.append(t - 0.06)
+        D.append([])
+        for j, k in enumerate(g):
+            a, b = chunks[k]
+            a, b = max(0, a - 0.04), b + 0.06
+            D[-1].append(t - S[-1])
+            seg = x[int(a * SR):int(b * SR)]
+            pieces.append(seg)
+            t += len(seg) / SR
+            gap = GAP_IN if j < len(g) - 1 else GAP_SCENE
+            pieces.append(np.zeros(int(gap * SR), np.float32))
+            t += gap
+    v = np.concatenate(pieces)
+    path = f"{WORK}/voz.wav"
+    os.makedirs(WORK, exist_ok=True)
+    write_wav(path, v * 1.0)
+    return S, t + TAIL, path, D
 
 
 HTML = r"""<html><head><style>
@@ -67,17 +96,17 @@ body{margin:0;background:#000}
 <div class="bg" id="flash" style="background:#fff;opacity:0"></div>
 </div>
 <script>
-const S=%(S)s, TOTAL=%(TOTAL)s, ICONS=%(ICONS)s;
+const S=%(S)s, TOTAL=%(TOTAL)s, ICONS=%(ICONS)s, D=%(D)s;
 const cl=x=>Math.max(0,Math.min(1,x)), oc=p=>1-Math.pow(1-p,3);
 const ob=p=>{const c1=1.9,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2)};
 const el=(h,x,y,extra='')=>`<div class="it" data-a style="left:${x}px;top:${y}px;${extra}">${h}</div>`;
 // escenas: lista de [html, x, y, anim, delay, extra]
-const forma=(num,label,title,icon,items)=>[
+const forma=(num,label,title,icon,items,dl,extra=[])=>[
  [`<div style="font-size:620px;font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:5px #0A0A0A;opacity:.35;letter-spacing:-.05em">${num}</div>`,330,1050,'slideR',0],
  [`<span class="chip">${num} · ${label}</span>`,90,330,'pop',0],
  [ICONS[icon],820,250,'spin',.1],
  [`<div style="width:700px;font-size:96px;font-weight:800;line-height:1.02;letter-spacing:-.02em">${title}</div>`,90,450,'slam',.05],
- ...items.map((t,i)=>[`<div class="card"><i>${i+1}</i><span>${t}</span></div>`,90,760+i*170,'slideL',.35+i*.28])];
+ ...items.map((t,i)=>[`<div class="card"><i>${i+1}</i><span>${t}</span></div>`,90,800+i*165,'slideL',dl[i]]),...extra];
 const SC=[
  [[`<div style="font-size:1300px;font-weight:800;line-height:1;color:#0A0A0A;opacity:.18">€</div>`,180,380,'zoom',0],
   [`<div style="font-size:150px;font-weight:800;line-height:1;letter-spacing:-.03em">El dinero</div>`,90,560,'pop',0],
@@ -86,15 +115,17 @@ const SC=[
  [[`<div style="font-size:150px;font-weight:800;line-height:1;letter-spacing:-.03em;opacity:.25">El dinero no es lo que te frena.</div>`,90,420,'none',0,'width:900px'],
   [`<div style="background:#fff;color:#1F4BFF;padding:26px 40px;font-size:76px;font-weight:800;transform:rotate(-3deg)">Es no saber<br>a dónde vas.</div>`,110,900,'slam',0]],
  [[`<div id="cnt" style="font-size:760px;font-weight:800;line-height:1;color:#0A0A0A">4</div>`,330,330,'count',0],
-  [`<div style="font-size:92px;font-weight:800;line-height:1.05;text-align:center;width:900px">formas de<br>financiar tu negocio</div>`,90,1180,'slideL',.3]],
- forma('01','SIN PEDIR A NADIE','Empieza con lo que <span class="k">tienes</span>.','monedas',['Ahorra y empieza pequeño.','Cobra por adelantado.','Paga a proveedores a 30–60 días.']),
- forma('02','SOCIO O INVERSOR','Alguien que pone <span class="k">dinero</span>.','personas',['Un socio que entra.','Business angels.','Crowdfunding.']),
- forma('03','AYUDAS PÚBLICAS','Dinero que no se <span class="k">devuelve</span>.','documento',['Tarifa plana: 80 €/mes.','Cuota cero en Andalucía.','Capitalizar el paro.']),
- forma('04','PRÉSTAMOS','Deuda, pero con <span class="k">ayuda</span>.','banco',['Microcréditos sin aval.','ENISA para jóvenes.','Banco con aval de Garántia.']),
+  [`<div style="font-size:92px;font-weight:800;line-height:1.05;text-align:center;width:900px">formas de<br>financiar tu negocio</div>`,90,1180,'slideL',.3],
+  [`<div style="background:#fff;color:#1F4BFF;padding:18px 34px;font-size:64px;font-weight:800;transform:rotate(-4deg)">Apunta ✍️</div>`,620,1460,'slam',(D[2][1]||1.8)]],
+ forma('01','SIN PEDIR A NADIE','Empieza con lo que <span class="k">tienes</span>.','monedas',['Ahorra.','Empieza pequeño.','Cobra por adelantado.'],[D[3][1],D[3][1]+.55,D[3][1]+1.3]),
+ forma('02','SOCIO O INVERSOR','Alguien que pone <span class="k">dinero</span>.','personas',['Un socio que entra.','Un inversor.','Business angels o crowdfunding.'],[D[4][0]+.7,D[4][0]+1.3,D[4][0]+1.8],
+   [[`<div style="display:flex;gap:18px;font-size:40px;font-weight:800"><span style="background:#0A0A0A;padding:16px 28px;border-radius:999px">+ Más capital</span><span style="border:4px solid #0A0A0A;padding:12px 28px;border-radius:999px">− Compartes decisiones</span></div>`,90,1300,'pop',D[4][1]]]),
+ forma('03','AYUDAS PÚBLICAS','Dinero que no se <span class="k">devuelve</span>.','documento',['Tarifa plana: 80 €/mes.','Cuota cero en Andalucía.','Capitalizar el paro.'],[D[5][1],D[5][2],D[5][2]+1.3]),
+ forma('04','PRÉSTAMOS','Deuda, pero con <span class="k">ayuda</span>.','banco',['Microcréditos sin aval.','ENISA si eres joven.'],[D[6][2],D[6][2]+1.4]),
  [[`<div style="font-size:170px;font-weight:800;line-height:1;letter-spacing:-.03em">Ninguna<br>sirve sin<br>un <span class="b">plan</span>.</div>`,90,620,'slam',0]],
  [[`<div style="font-size:84px;font-weight:800;line-height:1.08">Quien quiere llegar<br>a la <span class="b">Z</span> de golpe…</div>`,90,520,'pop',0],
   [`<svg width="1080" height="420" id="track"></svg>`,0,880,'none',0],
-  [`<div style="font-size:84px;font-weight:800">…abandona en la <span class="b">C</span>.</div>`,90,1330,'slam',1.15]],
+  [`<div style="font-size:84px;font-weight:800">…abandona en la <span class="b">C</span>.</div>`,90,1330,'slam',1.55]],
  [[`<div style="font-size:170px;font-weight:800;line-height:1;letter-spacing:-.03em">Empieza<br>por la <span class="k">A</span>.</div>`,90,420,'slam',0],
   [`<div id="steps"></div>`,0,0,'none',0],
   [`<div style="font-size:46px;font-weight:800">Escríbeme por privado <span class="k">→</span></div>`,90,1640,'pop',1.0]]];
@@ -103,11 +134,11 @@ const shakeAt=[[0,.75],[1,0],[3,.05],[4,.05],[5,.05],[6,.05],[7,0],[8,1.15],[9,0
 let cur=-1;
 function trackSVG(p){ // p 0..1 progreso de la escena 8
  const xs=[150,390,630],L="ABC";let s='';
- const d=oc(cl(p/0.6));const x2=150+(630-150)*d;
+ const d=oc(cl(p/0.45));const x2=150+(630-150)*d;
  s+=`<path d="M150 210 L${x2} 210" stroke="#fff" stroke-width="12" stroke-linecap="round"/>`;
  xs.forEach((x,i)=>{const q=cl((p-i*.18)/.15);const r=56*ob(q);s+=`<circle cx="${x}" cy="210" r="${Math.max(0,r)}" fill="${i<2?'#1F4BFF':'#fff'}"/><text x="${x}" y="230" text-anchor="middle" font-family="M" font-weight="800" font-size="56" fill="${i<2?'#fff':'#1F4BFF'}" opacity="${q}">${L[i]}</text>`});
- const z=cl((p-.45)/.2);s+=`<path d="M690 210 L900 210" stroke="#fff" stroke-width="8" stroke-dasharray="4 28" stroke-linecap="round" opacity="${z*.6}"/><circle cx="960" cy="210" r="56" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="12 12" opacity="${z*.6}"/><text x="960" y="230" text-anchor="middle" font-family="M" font-weight="800" font-size="56" fill="#fff" opacity="${z*.6}">Z</text>`;
- const x=cl((p-.62)/.1);const sc=1+2*(1-ob(x));if(x>0)s+=`<g transform="translate(630 70) scale(${sc})" opacity="${x}"><path d="M-40 -40 L40 40 M40 -40 L-40 40" stroke="#FF3B3B" stroke-width="16" stroke-linecap="round"/></g>`;
+ const z=cl((p-.3)/.2);s+=`<path d="M690 210 L900 210" stroke="#fff" stroke-width="8" stroke-dasharray="4 28" stroke-linecap="round" opacity="${z*.6}"/><circle cx="960" cy="210" r="56" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="12 12" opacity="${z*.6}"/><text x="960" y="230" text-anchor="middle" font-family="M" font-weight="800" font-size="56" fill="#fff" opacity="${z*.6}">Z</text>`;
+ const x=cl((p-.52)/.1);const sc=1+2*(1-ob(x));if(x>0)s+=`<g transform="translate(630 70) scale(${sc})" opacity="${x}"><path d="M-40 -40 L40 40 M40 -40 L-40 40" stroke="#FF3B3B" stroke-width="16" stroke-linecap="round"/></g>`;
  return s;}
 function stepsHTML(p){let s='';for(let i=0;i<3;i++){const q=ob(cl((p-.15-i*.18)/.3));const h=(260+i*230)*q;
  s+=`<div style="position:absolute;left:${90+i*310}px;top:${1560-h}px;width:280px;height:${h}px;border-radius:20px 20px 0 0;${i==0?'background:#0A0A0A':'border:6px solid #0A0A0A;border-bottom:none;box-sizing:border-box'};overflow:hidden"><div style="position:absolute;left:30px;top:16px;font-size:${i==0?130:96}px;font-weight:800;${i==0?'color:#fff':'color:transparent;-webkit-text-stroke:3px #0A0A0A'}">${"ABC"[i]}</div></div>`}return s}
@@ -150,7 +181,6 @@ ICONS = {
 
 
 # ---------- efectos de sonido sintetizados ----------
-SR = 44100
 
 
 def tone(f0, f1, dur, vol=.5, decay=8):
@@ -197,7 +227,7 @@ def sfx_track(S, total):
         elif i == 7:
             put(thud, st + .05)
         elif i == 8:
-            put(tone(300, 80, .4, .8, 6), st + 1.2)
+            put(tone(300, 80, .4, .8, 6), st + 1.55)
         elif i == 9:
             put(thud, st + .05)
             for k in range(3):
@@ -222,12 +252,12 @@ def write_wav(path, x):
         w.writeframes((x * 32767).astype(np.int16).tobytes())
 
 
-async def frames(S, total):
+async def frames(S, total, D):
     os.makedirs(WORK, exist_ok=True)
     for f in os.listdir(WORK):
         if f.endswith(".jpg"):
             os.remove(os.path.join(WORK, f))
-    html = HTML % {"F": F, "S": json.dumps(S), "TOTAL": total, "ICONS": json.dumps(ICONS)}
+    html = HTML % {"F": F, "S": json.dumps(S), "TOTAL": total, "ICONS": json.dumps(ICONS), "D": json.dumps(D)}
     open(f"{WORK}/reel.html", "w").write(html)
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--allow-file-access-from-files"])
@@ -242,16 +272,16 @@ async def frames(S, total):
 
 
 def main():
-    voice = sys.argv[1] if len(sys.argv) > 1 else None
-    S, total, off = scene_starts(voice)
+    voice_in = sys.argv[1] if len(sys.argv) > 1 else None
+    S, total, voice, D = prepare(voice_in)
     print("escenas:", [round(x, 2) for x in S], "total:", round(total, 2))
-    asyncio.run(frames(S, total))
+    asyncio.run(frames(S, total, D))
     write_wav(f"{WORK}/sfx.wav", sfx_track(S, total))
     out = os.path.join(ROOT, "12-financiacion", "reel.mp4")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", f"{WORK}/f%05d.jpg", "-i", f"{WORK}/sfx.wav"]
     if voice:
         cmd += ["-i", voice, "-filter_complex",
-                f"[1:a]volume=0.45[s];[2:a]adelay={int(off*1000)}|{int(off*1000)},volume=1.6[v];[s][v]amix=inputs=2:duration=first:normalize=0[a]",
+                "[1:a]volume=0.4[s];[2:a]volume=1.5[v];[s][v]amix=inputs=2:duration=first:normalize=0[a]",
                 "-map", "0:v", "-map", "[a]"]
     else:
         cmd += ["-map", "0:v", "-map", "1:a"]
