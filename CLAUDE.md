@@ -2,9 +2,12 @@
 
 Repositorio público que sirve de alojamiento de imágenes para programar posts en Metricool.
 
-## Posicionamiento
-Alejandro Segura es **asesor estratégico global de pymes** (Huelva): estrategia, organización, ventas, rentabilidad, equipo y crecimiento. Lema: Entender · Priorizar · Decidir.
-NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes. Esos temas pueden aparecer, pero mezclados con estrategia, dirección, prioridades, equipo, ventas, crecimiento y toma de decisiones.
+## Posicionamiento (desde el 13-nov, manda sobre todo el contenido)
+Alejandro Segura es **asesor estratégico de pymes** (Huelva): **ordena empresas para que el dueño trabaje menos y gane más**. Quiere que le vean como alguien que ordena tu empresa, un estratega que te hace trabajar menos y ganar más.
+- Formularlo siempre como objetivo y forma de trabajar, nunca como garantía ("te hago ganar X") hasta tener un caso real documentado.
+- Método con nombre: **Entender · Priorizar · Decidir** (Entender dónde está la empresa de verdad; Priorizar qué tocar primero; Decidir con criterio, no a ciegas).
+- Filtro para cada pieza: ¿ayuda a **ordenar**, a **trabajar menos** o a **ganar más**? Si no, no se publica.
+- NO es asesor financiero: los números aparecen, pero mezclados con estrategia, dirección, prioridades, equipo, ventas, tiempo y toma de decisiones.
 
 ## Marca personal (desde el 8-nov, manda sobre todo lo demás)
 - Base en el doc del proyecto claude/marca-personal.md: asesor estratégico (no emprendedor) totalmente preparado por su capacidad de análisis y de decisión; le encantan los números y las empresas; fallar no es para rendirse (escalada, que practica); movimiento y libertad. No hablar de "aprender haciendo" ni de "empezar".
@@ -14,7 +17,7 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 ## Flujo
 1. Alejandro pide un post sobre un tema (o se le propone en la rutina del domingo a partir de sus notas de la semana).
 2. Se enseña el borrador (3 diapositivas + pie de foto) y se espera su OK explícito.
-3. Se generan las imágenes (1080×1350, JPG) y se suben a `NN-tema/1.jpg`, `2.jpg`, `3.jpg` (NN = número correlativo; el último usado es 12).
+3. Se generan las imágenes (1080×1350, JPG) o el Reel y se suben a `NN-tema/` (NN = número correlativo; el último usado es 16). Reels: `NN-tema/reel-tema.mp4` + `portada-reel-tema.jpg` (1080×1920, texto dentro de la franja central 1080×1440).
 4. Se programan en Metricool (brand 7917252, Instagram) con las URLs
    `https://raw.githubusercontent.com/alextersm12/posts-instagram/main/NN-tema/N.jpg`.
    Nunca se publica sin su aprobación.
@@ -30,6 +33,7 @@ NO es asesor financiero: el contenido no debe centrarse solo en caja y márgenes
 
 ## Ritmo y rutinas (agencia de redes)
 - 2 carruseles por semana: lunes y jueves a las 10:00 (mejor hora según Metricool).
+- Desde el 13-nov la mayoría de publicaciones son Reels (texto animado dinámico + voz de ElevenLabs "Rafa N" que genera Alejandro + efectos; scripts tools/render_1N_reel.py), marcados como hechos con IA, con CTA final de palabra clave por privado (PLAN, NÚMEROS). Fin de semana sin publicaciones.
 - Desde el 12-nov, también viernes 10:00: post más explicativo y gráfico (p. ej. 12-financiacion, 7 diapositivas con tarjetas, iconos y cifra gigante en contorno), con una historia de aviso a las 10:15 que enseña la portada y manda al perfil. Alejandro pidió diseños menos lisos y más gráficos.
 - Domingo: propuesta de los 2 carruseles de la semana para aprobar.
 - Lunes: informe de la semana anterior + estudio de mejora + agenda de lo programado esta semana. Primer lunes de cada mes: además, estudio de competencia y revisión de estrategia.
