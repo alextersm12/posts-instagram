@@ -40,7 +40,8 @@ Alejandro Segura es **asesor estratégico de pymes** (Huelva): **ordena empresas
 - Métrica principal: conversaciones con empresarios iniciadas desde Instagram. Seguidores y "me gusta" son secundarios.
 
 ## Historias
-- 2 por semana: martes y miércoles, ambas con caja de preguntas (no encuesta). Es una prueba de 4 semanas; en la revisión de diciembre se ajustan los días según las conversaciones que generen.
+- Llamada a la acción (desde el 18-nov): que escriban por privado, de forma sutil (p. ej. "¿Lo cambiamos?" en azul y una flecha fina hacia abajo, al cuadro de mensaje). Nada de botones tipo "Escríbeme por privado". Sin caja de preguntas salvo que Alejandro la pida.
+- 2 por semana: martes y miércoles. Es una prueba de 4 semanas; en la revisión de diciembre se ajustan los días según las conversaciones que generen.
 - 1080×1920. Martes: fondo negro con luz azul difusa, interrogación en contorno azul y rejilla que se desvanece. Miércoles: fondo azul en degradado con ondas finas negras. Ambos con grano fino. Plantilla: `historias/tools/render_story.py`.
 - Solo la pregunta (centrada en el empresario, no en Alejandro), raya de color y @alejandro.segura.asesor abajo. Sin subtítulos tipo "Vota", "Responde", "Cuéntamelo". Sin frases de filosofía por ahora.
 - Hueco libre en el centro: Alejandro añade la caja de preguntas desde el móvil (Metricool no puede poner stickers).
