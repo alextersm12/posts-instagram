@@ -1,9 +1,9 @@
 """Trial Reels de prueba (ronda 1, 23-25 nov 2026): 3 temas x 2 ganchos, solo texto en pantalla + sonido.
 Mismo cuerpo dentro de cada tema; solo cambia el gancho (A = pregunta, B = afirmación) para medir el gancho aislado.
-Sin voz sintética, así que no lleva etiqueta de IA.
+Voz en off de ElevenLabs (Rafa N), un clip por escena; las escenas duran lo que su frase. Lleva etiqueta de IA.
 Uso: python3 tools/render_trial_reels.py [id ...]   (ids: t1a t1b t2a t2b t3a t3b; sin ids, todos)
 Salida: trial/r1-<id>.mp4 (720x1280, < 3 MB)."""
-import asyncio, json, os, subprocess, sys
+import asyncio, json, os, re, subprocess, sys
 import numpy as np
 from playwright.async_api import async_playwright
 
@@ -72,7 +72,7 @@ body{margin:0;background:#000}
 <div class="bg" id="flash" style="background:#fff;opacity:0"></div>
 </div>
 <script>
-const SC=%(SC)s, S=%(S)s, TOTAL=%(TOTAL)s, SYM="%(SYM)s", KW="%(KW)s";
+const SC=%(SC)s, S=%(S)s, P=%(P)s, TOTAL=%(TOTAL)s, SYM="%(SYM)s", KW="%(KW)s";
 const cl=x=>Math.max(0,Math.min(1,x)), oc=p=>1-Math.pow(1-p,3), ob=p=>{const c1=1.9,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2)};
 function symbol(t){
  const st='fill="none" stroke="#1F4BFF" stroke-width="10" opacity=".35"';
@@ -92,11 +92,11 @@ function render(t){
  const kick=(dl,a=18)=>{const k=lt-dl-.1;if(k>0&&k<.25)sh=Math.max(sh,(1-k/.25)*a)};
  if(type=='hook'){it(`<div style="white-space:nowrap;font-size:92px;font-weight:800;line-height:1.04;letter-spacing:-.03em">${data}</div>`,80,520,'slam',0);kick(0,24)}
  if(type=='line'){it(`<div style="white-space:nowrap;font-size:84px;font-weight:800;line-height:1.08;letter-spacing:-.02em">${data}</div>`,80,600,'pop',0);kick(.05,10)}
- if(type=='turn'){blue=lt>.9;
+ if(type=='turn'){const tb=P[s][0];blue=lt>tb;
   it(`<div style="font-size:64px;font-weight:700;color:${blue?'#0A0A0A':'#B8BCC8'}">${data[0]}</div>`,80,520,'pop',0);
-  if(blue){it(`<div style="font-size:168px;font-weight:800;line-height:1;letter-spacing:-.04em">${data[1]}</div>`,80,720,'slam',.9);kick(.9,26)}}
+  if(blue){it(`<div style="font-size:168px;font-weight:800;line-height:1;letter-spacing:-.04em">${data[1]}</div>`,80,720,'slam',tb);kick(tb,26)}}
  if(type=='list'){it(`<div style="font-size:60px;font-weight:800;color:#1F4BFF">${data[0]}</div>`,80,420,'pop',0);
-  data[1].forEach((x,i)=>{const dl=.5+i*1.1;
+  data[1].forEach((x,i)=>{const dl=P[s][i];
    it(`<div style="width:900px;display:flex;gap:34px;align-items:flex-start;background:#ffffff0d;border-left:12px solid #1F4BFF;border-radius:18px;padding:34px 36px"><div style="flex:none;font-size:74px;font-weight:800;line-height:1;color:#1F4BFF">${i+1}</div><div style="font-size:58px;font-weight:800;line-height:1.12">${x}</div></div>`,80,600+i*300,'slide',dl);kick(dl+.1,8)})}
  if(type=='cta'){it(`<div style="width:920px;font-size:92px;font-weight:800;line-height:1.05;letter-spacing:-.02em">${data}</div>`,80,560,'slam',0);kick(0);
   it(`<div style="font-size:54px;font-weight:700;color:#C9CDD8">Escríbeme <span style="color:#fff;font-weight:800;border-bottom:6px solid #1F4BFF">${KW}</span> por privado</div>`,80,1080,'pop',.9);
@@ -112,24 +112,60 @@ function render(t){
 </script></body></html>"""
 
 
+VOZ = os.environ.get("VOZ_DIR", "/tmp/voz")  # clips de Rafa N: <id>.mp3 (gancho) y tN-line/turn/list/cta.mp3
+# pausas (por orden) tras las que entra cada punto de la lista, según las tomas del 20-nov
+LIST_GAPS = {"t1": [0, 2, 4], "t2": [0, 1, 2], "t3": [2, 4, 7]}
+PAD = {"hook": .45, "line": .4, "turn": .5, "list": .5, "cta": 1.6}
+
+
+def clip_info(path):
+    """Duración útil del clip (sin silencio final) y finales de pausas internas."""
+    from render_12_reel import load_pcm
+    x = load_pcm(path)
+    err = subprocess.run(["ffmpeg", "-i", path, "-af", "silencedetect=noise=-35dB:d=0.12", "-f", "null", "-"],
+                         capture_output=True, text=True).stderr
+    ss = [float(v) for v in re.findall(r"silence_start: ([\d.]+)", err)]
+    se = [float(v) for v in re.findall(r"silence_end: ([\d.]+)", err)]
+    dur = len(x) / SR
+    end = ss[-1] if len(ss) > len(se) else dur
+    gaps = [(b - a, b) for a, b in zip(ss, se) if a > .05 and b < end - .05]
+    return x, end, gaps
+
+
 def scenes(rid):
     tp = TOPICS[rid[:2]]
     sc = [("hook", tp["hooks"][rid[2]])] + tp["body"]
-    S, t = [], 0.0
-    for typ, _ in sc:
+    files = [f"{VOZ}/{rid}.mp3"] + [f"{VOZ}/{rid[:2]}-{t}.mp3" for t, _ in tp["body"]]
+    S, P, clips, t = [], [], [], 0.0
+    for (typ, _), f in zip(sc, files):
+        x, end, gaps = clip_info(f)
         S.append(round(t, 3))
-        t += DUR[typ]
-    return sc, S, t, tp
+        lead = .12
+        if typ == "turn":
+            g = max(gaps) if gaps else (0, end / 2)
+            P.append([lead + g[1] - .05])
+        elif typ == "list":
+            idx = LIST_GAPS.get(rid[:2])
+            g = [gaps[i] for i in idx] if idx and len(gaps) > max(idx) else \
+                sorted(sorted(gaps, reverse=True)[:3], key=lambda z: z[1])
+            while len(g) < 3:
+                g.append((0, end * (len(g) + 1) / 4))
+            P.append([lead + z[1] - .1 for z in g])
+        else:
+            P.append([])
+        clips.append((t + lead, x[:int(end * SR)]))
+        t += lead + end + PAD[typ]
+    return sc, S, t, tp, P, clips
 
 
-def sfx(sc, S, total, seed):
+def sfx(sc, S, total, seed, P):
     out = np.zeros(int(SR * (total + 1)))
 
     def put(sig, at):
         i = int(at * SR)
         out[i:i + len(sig)] += sig[:max(0, len(out) - i)]
     thud, pop = tone(120, 45, .35, .9, 10), tone(900, 400, .12, .3, 30)
-    for (typ, _), st in zip(sc, S):
+    for (typ, _), st, pp in zip(sc, S, P):
         if st > 0:
             put(whoosh(), st - .15)
         if typ in ("hook", "cta"):
@@ -137,10 +173,10 @@ def sfx(sc, S, total, seed):
         elif typ == "line":
             put(pop, st + .05)
         elif typ == "turn":
-            put(thud, st + .95)
+            put(thud, st + pp[0])
         elif typ == "list":
-            for i in range(3):
-                put(pop, st + .55 + i * 1.1)
+            for v in pp:
+                put(pop, st + v)
     # base rítmica suave
     beat, t = 60 / 108, 0.0
     kick = tone(90, 40, .25, .5, 14)
@@ -163,12 +199,12 @@ def sfx(sc, S, total, seed):
 
 
 async def render_one(b, rid):
-    sc, S, total, tp = scenes(rid)
+    sc, S, total, tp, P, clips = scenes(rid)
     wd = f"{WORK}/{rid}"
     os.makedirs(wd, exist_ok=True)
     for f in os.listdir(wd):
         os.remove(os.path.join(wd, f))
-    html = HTML % {"F": F, "SC": json.dumps(sc, ensure_ascii=False), "S": json.dumps(S), "TOTAL": total,
+    html = HTML % {"F": F, "SC": json.dumps(sc, ensure_ascii=False), "S": json.dumps(S), "P": json.dumps(P), "TOTAL": total,
                    "SYM": tp["sym"], "KW": tp["kw"]}
     open(f"{wd}/reel.html", "w").write(html)
     pg = await b.new_page(viewport={"width": 1080, "height": 1920})
@@ -178,10 +214,18 @@ async def render_one(b, rid):
         await pg.evaluate(f"render({i / FPS})")
         await pg.screenshot(path=f"{wd}/f{i:05d}.jpg", type="jpeg", quality=90)
     await pg.close()
-    write_wav(f"{wd}/sfx.wav", sfx(sc, S, total, hash(rid) % 1000))
+    write_wav(f"{wd}/sfx.wav", sfx(sc, S, total, hash(rid) % 1000, P))
+    voz = np.zeros(int(SR * (total + 1)), np.float32)
+    for at, x in clips:
+        i = int(at * SR)
+        voz[i:i + len(x)] += x[:len(voz) - i]
+    write_wav(f"{wd}/voz.wav", voz)
     out = os.path.join(OUTDIR, f"r1-{rid}.mp4")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", f"{wd}/f%05d.jpg",
-                    "-i", f"{wd}/sfx.wav", "-vf", "scale=720:1280:flags=lanczos", "-c:v", "libx264",
+                    "-i", f"{wd}/sfx.wav", "-i", f"{wd}/voz.wav", "-filter_complex",
+                    "[1:a]volume=0.22[s];[2:a]volume=1.4[v];[s][v]amix=inputs=2:duration=first:normalize=0,"
+                    "loudnorm=I=-14:TP=-1.5[a]", "-map", "0:v", "-map", "[a]",
+                    "-vf", "scale=720:1280:flags=lanczos", "-c:v", "libx264",
                     "-preset", "slow", "-crf", "26", "-maxrate", "1200k", "-bufsize", "2400k",
                     "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-ar", "44100",
                     "-shortest", "-movflags", "+faststart", out], check=True)
