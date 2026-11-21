@@ -22,6 +22,11 @@ CTA_HOLD = 1.8
 SAY = {
     "t1a": "¿Podrías irte una semana sin que tu negocio se pare?",
     "t1c": "Si mañana te pones malo… ¿tu negocio abre?",
+    "t1d": "¿Cuántas cosas de tu empresa solo sabes hacer tú?",
+    "t2c": "¿Sabes qué cliente te hace perder dinero?",
+    "t2d": "¿Cuánto te queda limpio de cada venta?",
+    "t3c": "Lunes, 9 de la mañana: ¿qué es lo primero que haces?",
+    "t3d": "Si todo es urgente… ¿qué haces primero?",
     "t1b": "Si todo pasa por ti, tu negocio no es libre. Y tú tampoco.",
     "t1-line": "Presupuestos. Quejas. Pagos. Todo te espera a ti.",
     "t1-turn": "No es falta de tiempo. Es falta de orden.",
@@ -41,7 +46,7 @@ SAY = {
     "t3-cta": "¿Cuál es tu prioridad número uno esta semana? Escríbeme «orden» por privado.",
 }
 KW = {"t1": "TIEMPO", "t2": "MARGEN", "t3": "ORDEN"}
-HI = {"semana", "malo", "abre", "pare", "libre", "tampoco", "todo", "tiempo", "orden", "uno", "dos", "tres", "soltarías",
+HI = {"semana", "malo", "abre", "tú", "perder", "limpio", "venta", "lunes", "primero", "pare", "libre", "tampoco", "todo", "tiempo", "orden", "uno", "dos", "tres", "soltarías",
       "vendes", "mismo", "ganar", "horas", "costes", "descuentos", "entra", "queda", "margen", "cliente",
       "descuento", "más", "urgente", "nada", "elegir", "avanzar", "pendiente", "dinero", "decidir",
       "priorizar", "entender", "prioridad", "persona", "proceso", "ti", "pagos", "quejas", "presupuestos"}
@@ -123,9 +128,9 @@ def build(rid):
     return C, audio, voice_end, voice_end + CTA_HOLD
 
 
-BIG = {"t1": {"a": "?", "b": "TÚ", "c": "?", "line": "TODO", "turn": "ORDEN", "list": "1·2·3", "cta": "TIEMPO"},
-       "t2": {"a": "?", "b": "+€", "line": "MÁS", "turn": "MARGEN", "list": "1·2·3", "cta": "MARGEN"},
-       "t3": {"a": "?", "b": "TODO", "line": "URGENTE", "turn": "ELEGIR", "list": "1·2·3", "cta": "ORDEN"}}
+BIG = {"t1": {"a": "?", "b": "TÚ", "c": "?", "d": "TÚ", "line": "TODO", "turn": "ORDEN", "list": "1·2·3", "cta": "TIEMPO"},
+       "t2": {"a": "?", "b": "+€", "c": "€", "d": "€", "line": "MÁS", "turn": "MARGEN", "list": "1·2·3", "cta": "MARGEN"},
+       "t3": {"a": "?", "b": "TODO", "c": "9:00", "d": "?", "line": "URGENTE", "turn": "ELEGIR", "list": "1·2·3", "cta": "ORDEN"}}
 
 
 HTML = r"""<html><head><style>
