@@ -17,7 +17,7 @@ Alejandro Segura es **asesor estratégico de pymes** (Huelva): **ordena empresas
 ## Flujo
 1. Alejandro pide un post sobre un tema (o se le propone en la rutina del domingo a partir de sus notas de la semana).
 2. Se enseña el borrador (3 diapositivas + pie de foto) y se espera su OK explícito.
-3. Se generan las imágenes (1080×1350, JPG) o el Reel y se suben a `NN-tema/` (NN = número correlativo; el último usado es 18). Reels: `NN-tema/reel-tema.mp4` + `portada-reel-tema.jpg` (1080×1920, texto dentro de la franja central 1080×1440).
+3. Se generan las imágenes (1080×1350, JPG) o el Reel y se suben a `NN-tema/` (NN = número correlativo; el último usado es 20). Reels: `NN-tema/reel-tema.mp4` + `portada-reel-tema.jpg` (1080×1920, texto dentro de la franja central 1080×1440).
 4. Se programan en Metricool (brand 7917252, Instagram) con las URLs
    `https://raw.githubusercontent.com/alextersm12/posts-instagram/main/NN-tema/N.jpg`.
    Nunca se publica sin su aprobación.
