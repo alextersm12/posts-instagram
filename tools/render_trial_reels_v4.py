@@ -102,9 +102,9 @@ function render(t){
   let ws='';
   c.ws.forEach((w,j)=>{
    const on=HOOK?(t>=w.t-.03||j==0):true; if(!HOOK&&t<w.t-.03&&ci)return;
-   const p=HOOK||ci==0?1:cl((t-w.t+.03)/.22), q=ob(p);
-   const tag=w.hi?`class="tag" style="background:${S.tb};color:${S.tc};transform:rotate(${(rnd(ci*7+j)-.5)*6}deg) scale(${HOOK&&!on?1:(HOOK&&j==0?1:ob(cl((t-w.t)/.25)))})"`:`style="color:${S.fg}"`;
-   ws+=`<span class="m" style="opacity:${HOOK?(on?1:.3):cl(p*3)};transform:translateY(${(1-q)*60}px) scale(${.6+.4*q})"><span ${tag} ${w.hi?'':''}>${w.w}</span></span>`});
+   const p=HOOK?(j==0?1:cl((t-w.t+.03)/.12)):(ci==0?1:cl((t-w.t+.03)/.22)), q=ob(p);
+   const tag=w.hi?`class="tag" style="background:${S.tb};color:${S.tc};transform:rotate(${(rnd(ci*7+j)-.5)*6}deg) scale(${HOOK?(j==0?1:ob(cl((t-w.t+.03)/.18))):ob(cl((t-w.t)/.25))})"`:`style="color:${S.fg}"`;
+   ws+=`<span class="m" style="opacity:${HOOK?(on?1:0):cl(p*3)};transform:translateY(${(1-q)*(HOOK?30:60)}px) scale(${HOOK?.7+.3*q:.6+.4*q})"><span ${tag} ${w.hi?'':''}>${w.w}</span></span>`});
   const pop=HOOK?1:1+.18*(1-oc(cl(ct/.2))), rot=HOOK?0:(rnd(ci)-.5)*5;
   const sh=(sc=='list')?'none':'0 12px 40px #00000066';
   h=`<div style="position:absolute;left:60px;right:60px;top:${y}px;transform:translateY(-50%) scale(${pop}) rotate(${rot}deg);filter:blur(${HOOK?0:(1-oc(cl(ct/.15)))*6}px);text-align:center;font-size:${fs}px;font-weight:900;line-height:1.06;letter-spacing:-.03em;text-shadow:${sh}">${ws}</div>`;
