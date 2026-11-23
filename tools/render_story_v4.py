@@ -44,6 +44,7 @@ async def main(spec_path, out):
         await pg.goto("file:///tmp/v4work/story/s.html"); await pg.wait_for_timeout(500)
         for i in range(int(spec["dur"] * FPS)):
             await pg.evaluate(f"story({i / FPS})")
+            await pg.evaluate("Promise.all([...document.images].map(im=>im.complete&&im.naturalWidth?0:(im.decode?im.decode().catch(()=>0):0)))")
             await pg.screenshot(path=f"{work}/f{i:05d}.jpg", type="jpeg", quality=95)
         await b.close()
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", f"{work}/f%05d.jpg",

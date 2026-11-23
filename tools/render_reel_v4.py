@@ -143,6 +143,7 @@ async def render(spec_path, out, voz, preview):
         n = int(total * FPS)
         for i in range(0, n, step):
             await pg.evaluate(f"render({i / FPS})")
+            await pg.evaluate("Promise.all([...document.images].map(im=>im.complete&&im.naturalWidth?0:(im.decode?im.decode().catch(()=>0):0)))")
             await pg.screenshot(path=f"/tmp/v4work/frames/f{i // step:05d}.jpg", type="jpeg", quality=95)
         await b.close()
     write_wav("/tmp/v4work/sfx.wav", sfx(chunks, scenes, total, vend))

@@ -49,7 +49,7 @@ function chair(acc,glow){ // silla de oficina con volumen (degradados) — coord
  ${[-185,185,0,-110,110].map(x=>`<circle cx="${x}" cy="${x==0?322:(Math.abs(x)>150?306:322)}" r="17" fill="#0b0b0f" stroke="#666" stroke-width="3"/>`).join('')}
  <path d="M-225 -10 Q-245 40 -200 70 M225 -10 Q245 40 200 70" stroke="#2a2d38" stroke-width="22" fill="none" stroke-linecap="round"/>`}
 function clock(sec){const h=Math.floor(sec/3600),m=Math.floor(sec/60)%60,s=Math.floor(sec)%60,p=x=>String(x).padStart(2,'0');return `${p(h)}:${p(m)}:${p(s)}`}
-function img3d(d,t,mx){const i=Math.min(Math.floor(t*30),mx);return `<img class="a" src="file:///tmp/v4work/${d}/f${String(i).padStart(5,'0')}.jpg" style="width:1080px;height:1920px">`+VIG}
+function img3d(d,t,mx){const i=Math.max(0,Math.min(Math.floor(t*30),mx));return `<img class="a" src="file:///tmp/v4work/${d}/f${String(i).padStart(5,'0')}.jpg" style="width:1080px;height:1920px">`+VIG}
 function vaso3d(k,t,ov){const i=Math.min(Math.floor(t*30),k=='A'?138:156);return `<img class="a" src="file:///tmp/v4work/vaso3d/${k}/f${String(i).padStart(5,'0')}.jpg" style="width:1080px;height:1920px">${ov}`+VIG}
 const SC={
 silla(t){ // estudio oscuro, foco cálido sobre la silla vacía, reloj que corre
@@ -172,7 +172,7 @@ libreta(t){ // lista del lunes que se va tachando; lo importante se queda sin ta
   <div style="padding:20px 40px 0 110px">${rows}</div>
   <div style="position:absolute;left:100px;top:${20+5*96}px;width:700px;height:96px;border-radius:14px;box-shadow:0 0 0 4px rgba(31,75,255,${glow})"></div></div></div>`+VIG;},
 ajA(t){return img3d('aj3d/A',t,138)},
-ajB(t){return img3d('aj3d/B',t,156)+`<div style="position:absolute;top:250px;left:0;right:0;text-align:center;font-weight:800;font-size:36px;letter-spacing:8px;color:#ff5c6c;opacity:${.6+.4*Math.sin(t*6)}">TU RELOJ SIGUE CORRIENDO</div>`},
+ajB(t){return img3d('aj3d/B',t,156)+`<div style="position:absolute;top:250px;left:0;right:0;text-align:center;font-weight:800;font-size:30px;letter-spacing:3px;color:#ff5c6c;opacity:${.6+.4*Math.sin(t*6)}">MIENTRAS TE LAMENTAS, EL MERCADO SIGUE</div>`},
 ajC(t){return img3d('aj3d/C',t,90)},
 errores(t){ const it=[["✕","Un cliente que","no debiste coger"],["✕","Una inversión","que no salió"]];
  let h='';it.forEach((x,i)=>{const a=t-.1-i*1.4,p=ob(cl(a/.35));if(a<0)return;
@@ -189,6 +189,40 @@ lupa(t){ // mira con números qué falló
  ${[0,1,2,3].map(k=>`<line x1="150" x2="930" y1="${1150-k*150}" y2="${1150-k*150}" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>`).join('')}${bars}
  <g transform="translate(${lx} ${ly})"><circle r="110" fill="#ffffff10" stroke="#fff" stroke-width="12"/><line x1="78" y1="78" x2="170" y2="170" stroke="#fff" stroke-width="26" stroke-linecap="round"/></g>
  ${t>1.2?`<text x="540" y="440" text-anchor="middle" font-family="M" font-weight="900" font-size="64" fill="#ff5c6c" opacity="${oc(cl((t-1.2)/.3))}">¿QUÉ FALLÓ?</text>`:''}</svg>`+VIG;},
+alA(t){return img3d('al3d/A',t,150)},
+alB(t){return img3d('al3d/B',t,138)},
+dudas(t){ const q=["¿Contrato a alguien?","¿Abro otro local?","¿Bajo precios?"]; let h='';
+ q.forEach((x,i)=>{const a=t-.05-i*.55,p=ob(cl(a/.3));if(a<0)return;const rot=[-4,3,-2][i];
+  h+=`<div style="position:absolute;left:0;right:0;top:${440+i*270}px;text-align:center"><span style="display:inline-block;padding:34px 60px;border-radius:120px;background:rgba(255,255,255,.1);border:3px solid ${['#ffb35c','#5b7cff','#ff5c6c'][i]};font-weight:900;font-size:64px;color:#fff;transform:scale(${.5+.5*p}) rotate(${rot}deg);opacity:${p};box-shadow:0 30px 60px #0008">${x}</span></div>`});
+ return studio('#07060a','#1e1830','#b28cff',t,540,850)+`<div class="a">${h}</div>`+VIG;},
+dospaths(t){ // si buscas tiempo / si buscas margen
+ const p1=ob(cl((t-.1)/.35)), p2=ob(cl((t-1.6)/.35)), m1=oc(cl((t-.7)/.3)), m2=oc(cl((t-2.2)/.3));
+ const card=(y,p,lab,col,ans,ok,m)=>`<div style="position:absolute;left:90px;top:${y}px;width:900px;height:380px;border-radius:40px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.03));border:2px solid ${col}66;transform:translateX(${(1-p)*-1100}px);box-shadow:0 30px 60px #0008;box-sizing:border-box;padding:46px 56px">
+  <div style="font-weight:700;font-size:40px;color:#ffffffaa;letter-spacing:4px">SI LO QUE BUSCAS ES</div>
+  <div style="font-weight:900;font-size:104px;color:${col};line-height:1.1">${lab}</div>
+  <div style="display:flex;align-items:center;gap:26px;margin-top:22px;opacity:${m};transform:translateY(${(1-m)*20}px)"><div style="width:84px;height:84px;border-radius:50%;background:${ok?'#2bd67b':'#ff2e4d'};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:54px;color:#fff">${ok?'✓':'✕'}</div><div style="font-weight:800;font-size:54px;color:#fff">${ans}</div></div></div>`;
+ return studio('#05080a','#0f2a24','#2bd67b',t,540,800)+card(330,p1,'TIEMPO','#5bd6a0','Contratar puede servir',1,m1)+card(800,p2,'MARGEN','#ffb35c','A lo mejor no',0,m2)+VIG;},
+objetivo(t){ // la decisión empieza por el objetivo: diana 2027
+ const hit=t>1.0, ax=hit?540:-200+oc(cl(t/1.0))*740, sh=hit&&t<1.25?(R(Math.floor(t*60))-.5)*16:0;
+ return studio('#08050a','#2a0f18','#ff2e4d',t,540,860)+`<svg class="a" width="1080" height="1920"><g transform="translate(${540+sh} 860)">
+ ${[300,235,170,105,45].map((r,i)=>`<circle r="${r}" fill="${i%2?'#f2ede4':'#ff2e4d'}"/>`).join('')}
+ <text y="22" text-anchor="middle" font-family="M" font-weight="900" font-size="54" fill="#fff">2027</text></g>
+ ${hit?`<circle cx="540" cy="860" r="${60+(t-1)*500}" fill="none" stroke="#fff" stroke-width="6" opacity="${Math.max(0,1-(t-1)*2)}"/>`:''}
+ <g transform="translate(${ax} ${860-(540-ax)*.35}) rotate(-19)"><line x1="-420" y1="0" x2="0" y2="0" stroke="#e8dcc6" stroke-width="12"/><polygon points="0,-20 40,0 0,20" fill="#ccc"/><path d="M-420 -30 L-360 0 L-420 30 L-390 0 Z" fill="#1F4BFF"/></g></svg>`+VIG;},
+contrato(t){ // se firma un acuerdo y cae el sello de MALA DECISIÓN
+ const sig=cl((t-.15)/.7), st=t>1.0?ob(cl((t-1.0)/.18)):0, sh=t>1.0&&t<1.25?(R(Math.floor(t*60))-.5)*24:0;
+ const path="M120 0 C160 -40 200 40 240 0 S320 -30 360 10 S430 20 470 -10";
+ return studio('#07080c','#1d2233','#8fa6ff',t,540,820)+`<div class="a" style="transform:translate(${sh}px,${sh*.6}px)">
+ <div style="position:absolute;left:170px;top:380px;width:740px;height:960px;border-radius:14px;background:linear-gradient(#fdfcf8,#e9e6dd);box-shadow:0 50px 90px #000c;transform:rotate(-3deg);padding:70px 70px;box-sizing:border-box;color:#1b1d24">
+  <div style="font-weight:900;font-size:56px;letter-spacing:4px">ACUERDO</div><div style="font-weight:700;font-size:30px;color:#7a8090;margin-top:8px">Cliente nuevo · Condiciones especiales</div>
+  ${[0,1,2,3,4,5,6].map(i=>`<div style="height:16px;border-radius:8px;background:#d6d9e0;margin-top:${i?26:60}px;width:${[100,92,96,70,98,88,60][i]}%"></div>`).join('')}
+  <div style="position:absolute;left:70px;bottom:140px;font-weight:700;font-size:26px;color:#7a8090">Firma</div>
+  <svg style="position:absolute;left:30px;bottom:150px" width="600" height="120"><path d="${path}" transform="translate(0 60)" fill="none" stroke="#1F4BFF" stroke-width="7" stroke-linecap="round" stroke-dasharray="700" stroke-dashoffset="${700*(1-sig)}"/></svg></div>
+ ${st>0?`<div style="position:absolute;left:0;right:0;top:760px;text-align:center"><span style="display:inline-block;border:12px solid #e0243a;color:#e0243a;font-weight:900;font-size:92px;padding:14px 40px;border-radius:20px;transform:rotate(-14deg) scale(${2.2-1.2*st});opacity:${st};background:rgba(224,36,58,.08)">MALA DECISIÓN</span></div>`:''}</div>`+VIG;},
+lamento(t){ // perder dos veces
+ const c=(y,d,lab,sub)=>{const p=ob(cl((t-d)/.3));return `<div style="position:absolute;left:120px;top:${y}px;width:840px;height:300px;border-radius:40px;background:linear-gradient(135deg,rgba(224,36,58,.18),rgba(255,255,255,.03));border:2px solid #e0243a88;transform:scale(${.6+.4*p});opacity:${p};box-shadow:0 30px 60px #0008;display:flex;align-items:center;gap:40px;padding-left:50px;box-sizing:border-box">
+  <div style="font-weight:900;font-size:150px;color:#ff4d5e;width:200px;text-align:center">−1</div><div style="color:#fff;font-weight:800;font-size:52px;line-height:1.15">${lab}<br><span style="color:#ff9aa4;font-size:40px">${sub}</span></div></div>`};
+ return studio('#0a0507','#2a0f16','#ff4d5e',t,540,820)+c(420,.1,'La decisión','que salió mal')+c(800,.9,'El tiempo','que pasas lamentándola')+VIG;},
 };
 function dm(ct){ // cierre: móvil con el chat de Instagram escribiendo la palabra clave, sobre fondo oscuro con brillo de color
  const typed=KW.slice(0,Math.floor(cl((ct-.35)/.6)*KW.length+.001)), sent=ct>1.15, sp=oc(cl((ct-1.15)/.3));
@@ -220,7 +254,7 @@ function render(t){
  if(!inCta){let ci=0;while(ci+1<C.length&&t>=C[ci+1].t)ci++;const c=C[ci];
   const hiCol=['#FFE14D','#3BFF8A','#FFE14D','#FF5C8A'][ci%4], n=c.ws.reduce((a,w)=>a+w.w.length,0), fs=n>13?104:n>9?118:134;
   
-  const y=(S[k].scene=='ajA'||S[k].scene=='ajC')?330:(S[k].scene=='silla'||S[k].scene.startsWith('vaso')||S[k].scene=='ajB')?1620:S[k].scene=='pregunta'?1480:S[k].scene=='cerrado'?1000:1430;
+  const y=(S[k].scene=='ajA'||S[k].scene=='ajC'||S[k].scene=='alB')?300:(S[k].scene=='alA')?1600:(S[k].scene=='silla'||S[k].scene.startsWith('vaso')||S[k].scene=='ajB')?1620:S[k].scene=='pregunta'?1480:S[k].scene=='cerrado'?1000:1430;
   let ws='';c.ws.forEach((w,j)=>{const p=ob(cl((t-w.t+.04)/.22));if(t<w.t-.04&&j>0)return;
    ws+=(ws?' ':'')+`<span class="cw" style="color:${w.hi?hiCol:'#fff'};transform:scale(${.5+.5*p}) rotate(${(1-p)*-6}deg);display:inline-block">${w.w}</span>`});
   h=`<div class="cap" style="top:${y}px;transform:translateY(-50%);font-size:${fs}px">${ws}</div>`}
