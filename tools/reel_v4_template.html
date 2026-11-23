@@ -49,6 +49,7 @@ function chair(acc,glow){ // silla de oficina con volumen (degradados) — coord
  ${[-185,185,0,-110,110].map(x=>`<circle cx="${x}" cy="${x==0?322:(Math.abs(x)>150?306:322)}" r="17" fill="#0b0b0f" stroke="#666" stroke-width="3"/>`).join('')}
  <path d="M-225 -10 Q-245 40 -200 70 M225 -10 Q245 40 200 70" stroke="#2a2d38" stroke-width="22" fill="none" stroke-linecap="round"/>`}
 function clock(sec){const h=Math.floor(sec/3600),m=Math.floor(sec/60)%60,s=Math.floor(sec)%60,p=x=>String(x).padStart(2,'0');return `${p(h)}:${p(m)}:${p(s)}`}
+function img3d(d,t,mx){const i=Math.min(Math.floor(t*30),mx);return `<img class="a" src="file:///tmp/v4work/${d}/f${String(i).padStart(5,'0')}.jpg" style="width:1080px;height:1920px">`+VIG}
 function vaso3d(k,t,ov){const i=Math.min(Math.floor(t*30),k=='A'?138:156);return `<img class="a" src="file:///tmp/v4work/vaso3d/${k}/f${String(i).padStart(5,'0')}.jpg" style="width:1080px;height:1920px">${ov}`+VIG}
 const SC={
 silla(t){ // estudio oscuro, foco cálido sobre la silla vacía, reloj que corre
@@ -170,6 +171,24 @@ libreta(t){ // lista del lunes que se va tachando; lo importante se queda sin ta
   <div style="position:absolute;left:84px;top:0;bottom:0;width:3px;background:#ff8a8a"></div>
   <div style="padding:20px 40px 0 110px">${rows}</div>
   <div style="position:absolute;left:100px;top:${20+5*96}px;width:700px;height:96px;border-radius:14px;box-shadow:0 0 0 4px rgba(31,75,255,${glow})"></div></div></div>`+VIG;},
+ajA(t){return img3d('aj3d/A',t,138)},
+ajB(t){return img3d('aj3d/B',t,156)+`<div style="position:absolute;top:250px;left:0;right:0;text-align:center;font-weight:800;font-size:36px;letter-spacing:8px;color:#ff5c6c;opacity:${.6+.4*Math.sin(t*6)}">TU RELOJ SIGUE CORRIENDO</div>`},
+ajC(t){return img3d('aj3d/C',t,90)},
+errores(t){ const it=[["✕","Un cliente que","no debiste coger"],["✕","Una inversión","que no salió"]];
+ let h='';it.forEach((x,i)=>{const a=t-.1-i*1.4,p=ob(cl(a/.35));if(a<0)return;
+  h+=`<div style="position:absolute;left:${110+(1-p)*(i?700:-700)}px;top:${450+i*330}px;width:860px;height:260px;border-radius:36px;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.03));border:2px solid rgba(255,92,108,.45);box-shadow:0 30px 60px #0008, inset 0 1px 0 rgba(255,255,255,.2);display:flex;align-items:center;gap:36px;padding-left:46px;box-sizing:border-box">
+  <div style="width:140px;height:140px;border-radius:50%;background:#ff2e4d22;border:4px solid #ff2e4d;color:#ff5c6c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:72px">${x[0]}</div>
+  <div style="font-weight:800;font-size:50px;line-height:1.15;color:#fff">${x[1]}<br><span style="color:#ff5c6c">${x[2]}</span></div></div>`});
+ return studio('#08060a','#2a1018','#ff5c6c',t,540,800)+`<div class="a">${h}</div>`+VIG;},
+lupa(t){ // mira con números qué falló
+ const v=[62,48,71,35,80], hi=3; let bars='';
+ v.forEach((x,i)=>{const p=oc(cl((t-.1-i*.12)/.5)), hgt=x*6*p, bad=i==hi&&t>1.1;
+  bars+=`<rect x="${190+i*150}" y="${1150-hgt}" width="100" height="${hgt}" rx="14" fill="${bad?'#ff2e4d':'#1F4BFF'}" opacity="${bad||t<1.1?1:.45}" style="${bad?'filter:drop-shadow(0 0 24px #ff2e4d)':''}"/>`});
+ const lx=200+Math.min(1,t/1.1)*(190+hi*150+50-200), ly=780+Math.sin(t*3)*10;
+ return studio('#05070d','#101c3a','#1F4BFF',t,540,800)+`<svg class="a" width="1080" height="1920">
+ ${[0,1,2,3].map(k=>`<line x1="150" x2="930" y1="${1150-k*150}" y2="${1150-k*150}" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>`).join('')}${bars}
+ <g transform="translate(${lx} ${ly})"><circle r="110" fill="#ffffff10" stroke="#fff" stroke-width="12"/><line x1="78" y1="78" x2="170" y2="170" stroke="#fff" stroke-width="26" stroke-linecap="round"/></g>
+ ${t>1.2?`<text x="540" y="440" text-anchor="middle" font-family="M" font-weight="900" font-size="64" fill="#ff5c6c" opacity="${oc(cl((t-1.2)/.3))}">¿QUÉ FALLÓ?</text>`:''}</svg>`+VIG;},
 };
 function dm(ct){ // cierre: móvil con el chat de Instagram escribiendo la palabra clave, sobre fondo oscuro con brillo de color
  const typed=KW.slice(0,Math.floor(cl((ct-.35)/.6)*KW.length+.001)), sent=ct>1.15, sp=oc(cl((ct-1.15)/.3));
@@ -201,7 +220,7 @@ function render(t){
  if(!inCta){let ci=0;while(ci+1<C.length&&t>=C[ci+1].t)ci++;const c=C[ci];
   const hiCol=['#FFE14D','#3BFF8A','#FFE14D','#FF5C8A'][ci%4], n=c.ws.reduce((a,w)=>a+w.w.length,0), fs=n>13?104:n>9?118:134;
   
-  const y=(S[k].scene=='silla'||S[k].scene.startsWith('vaso'))?1620:S[k].scene=='pregunta'?1480:S[k].scene=='cerrado'?1000:1430;
+  const y=(S[k].scene=='ajA'||S[k].scene=='ajC')?330:(S[k].scene=='silla'||S[k].scene.startsWith('vaso')||S[k].scene=='ajB')?1620:S[k].scene=='pregunta'?1480:S[k].scene=='cerrado'?1000:1430;
   let ws='';c.ws.forEach((w,j)=>{const p=ob(cl((t-w.t+.04)/.22));if(t<w.t-.04&&j>0)return;
    ws+=(ws?' ':'')+`<span class="cw" style="color:${w.hi?hiCol:'#fff'};transform:scale(${.5+.5*p}) rotate(${(1-p)*-6}deg);display:inline-block">${w.w}</span>`});
   h=`<div class="cap" style="top:${y}px;transform:translateY(-50%);font-size:${fs}px">${ws}</div>`}
