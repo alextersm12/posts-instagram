@@ -142,15 +142,14 @@ cargas(t){ // tres problemas pequeños que se quedan
    <div style="width:130px;height:130px;border-radius:32px;background:${x[3]}22;border:3px solid ${x[3]};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:56px;color:#fff">${x[0]}</div>
    <div style="font-weight:800;font-size:44px;line-height:1.15;color:#fff">${x[1]}<br><span style="color:${x[3]}">${x[2]}</span></div></div>`});
  return studio('#06070b','#191c2a','#8fa6ff',t,540,800)+`<div class="a">${h}</div>`+VIG;},
-tiempo(t){ // hojas de calendario que caen: el problema no es el tamaño, es el tiempo
- const M=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];const n=Math.floor(Math.pow(t,1.6)*4);
+tiempo(t){ const page=(mo,y)=>`<div style="height:150px;background:#ff2e4d;color:#fff;font-weight:900;font-size:84px;text-align:center;line-height:150px;letter-spacing:6px">${mo}</div><div style="text-align:center;font-weight:900;font-size:170px;color:#0A0A0A;line-height:380px;letter-spacing:-4px">${y}</div>`; // hojas de calendario que caen: el problema no es el tamaño, es el tiempo
+ const M=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];const n=Math.min(29,Math.floor(Math.pow(t,1.6)*4));
  const cur=M[n%12], yr=2024+Math.floor(n/12); let fall='';
  for(let k=1;k<=3;k++){const m=n-k;if(m<0)continue;const ph=cl((Math.pow(t,1.6)*4-m-1)/1.2);
-  fall+=`<div style="position:absolute;left:290px;top:${520+ph*900}px;width:500px;height:560px;border-radius:30px;background:#e9ecf3;transform:rotate(${ph*(k%2?40:-35)}deg);opacity:${1-ph};box-shadow:0 30px 60px #0008"></div>`}
+  fall+=`<div style="position:absolute;left:290px;top:${520+ph*900}px;width:500px;height:560px;border-radius:30px;background:linear-gradient(#fff,#d9dde6);transform:rotate(${ph*(k%2?40:-35)}deg);opacity:${1-ph};box-shadow:0 30px 60px #0008;overflow:hidden">${page(M[m%12],2024+Math.floor(m/12))}</div>`}
  return studio('#07060a','#2a1414','#ff5c6c',t,540,850)+`<div class="a">
  <div style="position:absolute;left:290px;top:520px;width:500px;height:560px;border-radius:30px;background:linear-gradient(#fff,#d9dde6);box-shadow:0 40px 80px #000a;overflow:hidden">
-  <div style="height:150px;background:#ff2e4d;color:#fff;font-weight:900;font-size:84px;text-align:center;line-height:150px;letter-spacing:6px">${cur}</div>
-  <div style="text-align:center;font-weight:900;font-size:230px;color:#0A0A0A;line-height:300px">${yr}</div></div>${fall}</div>`+VIG;},
+${page(cur,yr)}</div>${fall}</div>`+VIG;},
 soltar(t){ // ponle cifra, decide, suéltalo
  const st=[["1","Ponle cifra"],["2","Decide"],["3","Suéltalo"]];let h='';
  st.forEach((x,i)=>{const a=t-.15-i*.75,p=ob(cl(a/.3)),ck=cl((a-.35)/.25);if(a<0)return;
