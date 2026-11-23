@@ -1,0 +1,213 @@
+<html><head><style>
+@font-face{font-family:M;src:url(file://__F__Montserrat-Medium.ttf);font-weight:500}
+@font-face{font-family:M;src:url(file://__F__Montserrat-Bold.ttf);font-weight:700}
+@font-face{font-family:M;src:url(file://__F__Montserrat-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:M;src:url(file://__F__Montserrat-Black.ttf);font-weight:900}
+body{margin:0;background:#000}
+#v{position:relative;overflow:hidden;width:1080px;height:1920px;font-family:M;color:#fff}
+.a{position:absolute;inset:0}
+.cap{position:absolute;left:60px;right:60px;text-align:center;font-weight:900;letter-spacing:-.02em;line-height:1.0}
+.cw{display:inline-block;margin:0 .06em;paint-order:stroke fill;-webkit-text-stroke:14px #000;text-shadow:0 12px 0 #0000004d}
+</style></head><body><div id="v">
+<div id="stage" class="a"></div>
+<div id="cap" class="a"></div>
+<div id="flash" class="a" style="background:#fff;opacity:0"></div>
+<svg class="a" width="1080" height="1920" style="mix-blend-mode:overlay;opacity:.22;pointer-events:none"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+<div id="prog" style="position:absolute;left:0;top:0;height:12px;width:0;background:#FFE14D"></div>
+<div id="handle" style="position:absolute;left:0;right:0;bottom:120px;text-align:center;font-size:30px;font-weight:800;opacity:.85;text-shadow:0 2px 8px #0008">@alejandro.segura.asesor</div>
+</div>
+<script>
+const C=__C__, S=__S__, VEND=__VEND__, TOTAL=__TOTAL__, KW="__KW__";
+const cl=x=>Math.max(0,Math.min(1,x)), oc=p=>1-Math.pow(1-p,3), eio=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2,
+ ob=p=>{const c1=1.7,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2)};
+const R=i=>{const x=Math.sin(i*12.9898+78.233)*43758.5453;return x-Math.floor(x)};
+function parts(t,n,col,seed,area){let s='';for(let i=0;i<n;i++){const x=(R(i+seed)*1080+Math.sin(t*.6+i)*40)%1080,y=((R(i*3+seed)*1920)-t*(30+R(i)*60)+1920*4)%1920,r=2+R(i*7)*5;
+ s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity="${.25+R(i*5)*.5}"/>`}return s}
+// ---------- ESCENAS (look "estudio": fondos oscuros con luz, profundidad y reflejos) ----------
+function studio(c1,c2,acc,t,fx=540,fy=760){ // fondo profesional: degradado profundo + foco de luz + suelo con reflejo + bokeh + viñeta
+ let bk='';for(let i=0;i<14;i++){const x=(R(i+40)*1180-50+Math.sin(t*.3+i)*30),y=R(i+80)*1100+Math.cos(t*.25+i)*25,r=30+R(i+9)*90;
+  bk+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${acc}" opacity="${.05+R(i+3)*.08}"/>`}
+ return `<div class="a" style="background:radial-gradient(1100px 1300px at ${fx}px ${fy}px,${c2},${c1} 70%)"></div>
+ <svg class="a" width="1080" height="1920"><defs><filter id="bb"><feGaussianBlur stdDeviation="14"/></filter>
+ <linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${acc}" stop-opacity=".16"/><stop offset=".25" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity=".8"/></linearGradient></defs>
+ <g filter="url(#bb)">${bk}</g>
+ <rect x="0" y="1290" width="1080" height="630" fill="url(#fl)"/><rect x="0" y="1288" width="1080" height="3" fill="${acc}" opacity=".35"/>
+ ${[...Array(9)].map((_,i)=>{const x=-600+i*285;return `<line x1="540" y1="1290" x2="${x}" y2="1920" stroke="#fff" stroke-opacity=".045" stroke-width="2"/>`}).join('')}
+ ${[1340,1420,1540,1720].map(y=>`<line x1="0" y1="${y}" x2="1080" y2="${y}" stroke="#fff" stroke-opacity=".04" stroke-width="2"/>`).join('')}</svg>`}
+const VIG=`<div class="a" style="background:radial-gradient(ellipse at 50% 45%,transparent 45%,#000a 100%)"></div>`;
+function chair(acc,glow){ // silla de oficina con volumen (degradados) — coordenadas centradas en 0,0
+ return `<defs><linearGradient id="lea" x1="0" x2="1"><stop offset="0" stop-color="#15161c"/><stop offset=".45" stop-color="#3b3f4d"/><stop offset=".6" stop-color="#2a2d38"/><stop offset="1" stop-color="#0c0d12"/></linearGradient>
+ <linearGradient id="met" x1="0" x2="1"><stop offset="0" stop-color="#555"/><stop offset=".5" stop-color="#e8e8e8"/><stop offset="1" stop-color="#444"/></linearGradient>
+ <radialGradient id="sh"><stop offset="0" stop-color="#000" stop-opacity=".75"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+ <ellipse cx="0" cy="335" rx="300" ry="46" fill="url(#sh)"/>
+ <path d="M-140 -300 Q0 -330 140 -300 L155 20 Q0 40 -155 20 Z" fill="url(#lea)" stroke="${glow}" stroke-opacity=".55" stroke-width="3"/>
+ <path d="M-100 -260 L-100 -10 M0 -275 L0 0 M100 -260 L100 -10" stroke="#000" stroke-opacity=".35" stroke-width="5"/>
+ <rect x="-22" y="20" width="44" height="60" fill="url(#met)"/>
+ <path d="M-190 70 Q0 45 190 70 L180 135 Q0 150 -180 135 Z" fill="url(#lea)" stroke="${glow}" stroke-opacity=".55" stroke-width="3"/>
+ <rect x="-12" y="140" width="24" height="110" fill="url(#met)"/>
+ <path d="M-185 300 L0 250 L185 300 M0 250 L0 318 M-110 318 L0 250 L110 318" stroke="url(#met)" stroke-width="16" fill="none" stroke-linecap="round"/>
+ ${[-185,185,0,-110,110].map(x=>`<circle cx="${x}" cy="${x==0?322:(Math.abs(x)>150?306:322)}" r="17" fill="#0b0b0f" stroke="#666" stroke-width="3"/>`).join('')}
+ <path d="M-225 -10 Q-245 40 -200 70 M225 -10 Q245 40 200 70" stroke="#2a2d38" stroke-width="22" fill="none" stroke-linecap="round"/>`}
+function clock(sec){const h=Math.floor(sec/3600),m=Math.floor(sec/60)%60,s=Math.floor(sec)%60,p=x=>String(x).padStart(2,'0');return `${p(h)}:${p(m)}:${p(s)}`}
+function vaso3d(k,t,ov){const i=Math.min(Math.floor(t*30),k=='A'?138:156);return `<img class="a" src="file:///tmp/v4work/vaso3d/${k}/f${String(i).padStart(5,'0')}.jpg" style="width:1080px;height:1920px">${ov}`+VIG}
+const SC={
+silla(t){ // estudio oscuro, foco cálido sobre la silla vacía, reloj que corre
+ const hr=t*360*.9, mn=t*360*10, sw=.92+.08*Math.sin(t*3);
+ return studio('#07080c','#2a1d14','#ffb35c',t,540,1050)+`<svg class="a" width="1080" height="1920">
+ <defs><linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".55"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></linearGradient>
+ <radialGradient id="pool"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".45"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient></defs>
+ <polygon points="470,0 610,0 900,1400 180,1400" fill="url(#cone)" opacity="${.55*sw}"/>
+ <ellipse cx="540" cy="1360" rx="420" ry="90" fill="url(#pool)" opacity="${sw}"/>
+ <g transform="translate(880 330)" opacity=".9"><circle r="88" fill="#111318" stroke="#ffb35c" stroke-opacity=".6" stroke-width="5"/>
+  ${[...Array(12)].map((_,i)=>`<line x1="0" y1="-72" x2="0" y2="-62" stroke="#aaa" stroke-width="4" transform="rotate(${i*30})"/>`).join('')}
+  <line y2="-44" stroke="#eee" stroke-width="9" stroke-linecap="round" transform="rotate(${hr})"/>
+  <line y2="-68" stroke="#ffb35c" stroke-width="5" stroke-linecap="round" transform="rotate(${mn})"/><circle r="8" fill="#ffb35c"/></g>
+ <g transform="translate(540 ${1010+Math.sin(t*1.5)*3}) scale(1.3)">${chair('#ffb35c','#ffcf8a')}</g>
+ <g transform="translate(540 1820) scale(1.3 -.5)" opacity=".12">${chair('#ffb35c','#ffcf8a')}</g>
+ ${parts(t,26,'#ffe3b8',3)}</svg>`+VIG;},
+cerrado(t){ // escaparate de noche, rótulo de neón que pasa de ABIERTO a CERRADO, reflejo en el suelo mojado
+ const sw=t>1.0, fl=sw?(t<1.4?(R(Math.floor(t*30))>.5?1:.2):(.85+.15*Math.sin(t*40))):(.9+.1*Math.sin(t*33));
+ const col=sw?'#ff2e4d':'#2bff88', txt=sw?'CERRADO':'ABIERTO';
+ let rain='';for(let i=0;i<60;i++){const x=R(i)*1080,y=((R(i+9)*1920)+t*1400*(.7+R(i)*.6))%1920;rain+=`<line x1="${x}" y1="${y}" x2="${x-8}" y2="${y+50}" stroke="#cfd8ff" stroke-opacity=".16" stroke-width="2"/>`}
+ const sign=(o)=>`<rect x="150" y="420" width="780" height="340" rx="30" fill="none" stroke="${col}" stroke-width="10" opacity="${o}" style="filter:drop-shadow(0 0 22px ${col}) drop-shadow(0 0 60px ${col})"/>
+ <text x="540" y="650" text-anchor="middle" font-family="M" font-weight="900" font-size="${sw?118:124}" fill="${col}" opacity="${o}" style="filter:drop-shadow(0 0 18px ${col}) drop-shadow(0 0 50px ${col})">${txt}</text>`;
+ return `<div class="a" style="background:radial-gradient(900px 800px at 50% 35%,#1a1426,#050409 75%)"></div>
+ <svg class="a" width="1080" height="1920"><rect x="80" y="330" width="920" height="520" rx="12" fill="#0b0a12" stroke="#2a2633" stroke-width="6"/>
+ <rect x="80" y="330" width="920" height="520" rx="12" fill="url(#gl)" opacity=".5"/>
+ <defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+ ${sign(fl)}<rect x="0" y="1250" width="1080" height="670" fill="#040307"/>
+ <g transform="translate(0 2500) scale(1 -1)" opacity=".22" style="filter:blur(6px)">${sign(fl)}</g>
+ <ellipse cx="540" cy="1290" rx="460" ry="50" fill="${col}" opacity="${.16*fl}" style="filter:blur(20px)"/>${rain}</svg>`+VIG;},
+puesto(t){ // credencial de empleado sobre fondo grafito con foco: el jefe es tu negocio
+ const sway=Math.sin(t*2.4)*7*Math.exp(-t*.4)+Math.sin(t*1.3)*2;
+ return studio('#08090d','#1d2233','#1F4BFF',t,540,800)+`<svg class="a" width="1080" height="1920"><defs>
+ <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9dde6"/></linearGradient>
+ <linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+ <clipPath id="cc"><rect width="580" height="760" rx="36"/></clipPath></defs>
+ <g transform="rotate(${sway} 540 0)">
+  <path d="M430 0 L520 330 M650 0 L560 330" stroke="#1F4BFF" stroke-width="24"/>
+  <rect x="500" y="305" width="80" height="64" rx="14" fill="url(#met2)" stroke="#999" stroke-width="3"/>
+  <defs><linearGradient id="met2" x1="0" x2="1"><stop offset="0" stop-color="#777"/><stop offset=".5" stop-color="#eee"/><stop offset="1" stop-color="#666"/></linearGradient></defs>
+  <g transform="translate(250 360)"><rect x="10" y="30" width="580" height="760" rx="36" fill="#000" opacity=".5" style="filter:blur(24px)"/>
+   <g clip-path="url(#cc)"><rect width="580" height="760" fill="url(#card)"/><rect width="580" height="160" fill="#0A0A0A"/>
+   <text x="290" y="104" text-anchor="middle" font-family="M" font-weight="900" font-size="60" letter-spacing="6" fill="#fff">EMPLEADO</text>
+   <circle cx="290" cy="320" r="105" fill="#e9ecf3" stroke="#0A0A0A" stroke-width="6"/><text x="290" y="365" text-anchor="middle" font-family="M" font-weight="900" font-size="124" fill="#0A0A0A">?</text>
+   <text x="60" y="520" font-family="M" font-weight="700" font-size="36" fill="#7a8090">NOMBRE</text><text x="60" y="580" font-family="M" font-weight="900" font-size="60" fill="#0A0A0A">TÚ</text>
+   <text x="60" y="650" font-family="M" font-weight="700" font-size="36" fill="#7a8090">JEFE</text><text x="60" y="708" font-family="M" font-weight="900" font-size="54" fill="#1F4BFF">tu negocio</text>
+   <rect x="${-300+((t*.6)%1.6)*900}" y="-100" width="140" height="1000" fill="url(#shine)" transform="rotate(20)"/></g></g>
+ </g>${parts(t,18,'#8fa6ff',5)}</svg>`+VIG;},
+movil(t){ // el móvil no para: notificaciones de cristal que se apilan
+ const msgs=["Cliente: ¿me llamas?","Proveedor: falta tu firma","Equipo: ¿esto cómo va?","Banco: revisa el cargo","Cliente: ¿me haces precio?","Equipo: te necesito"];
+ const n=Math.min(msgs.length,Math.floor(t/0.32)+1), cnt=Math.min(99,Math.floor(t*14)+1), sh=Math.sin(t*70)*5;
+ let b='';for(let i=0;i<n;i++){const age=t-i*.32,p=ob(cl(age/.3)),y=230+i*130;
+  b+=`<div style="position:absolute;left:${170+(1-p)*-560+sh}px;top:${y}px;width:740px;height:108px;border-radius:30px;background:rgba(255,255,255,.13);backdrop-filter:blur(18px);border:2px solid rgba(255,255,255,.22);box-shadow:0 20px 50px #0007;display:flex;align-items:center;gap:22px;padding-left:26px;font-weight:700;font-size:35px;color:#fff">
+  <div style="width:56px;height:56px;border-radius:16px;background:${['#ff4d6d','#3bd16f','#4d7cff','#ffb020','#ff4d6d','#3bd16f'][i]}"></div>${msgs[i]}</div>`}
+ return `<div class="a" style="background:radial-gradient(900px 1100px at 50% 55%,#3b1d6e,#0c0718 72%)"></div>
+ <div class="a" style="filter:blur(60px)"><div style="position:absolute;left:${300+Math.sin(t)*80}px;top:500px;width:500px;height:500px;border-radius:50%;background:#7b3cff;opacity:.45"></div></div>
+ <svg class="a" width="1080" height="1920"><defs><linearGradient id="ph" x1="0" x2="1"><stop offset="0" stop-color="#2a2a30"/><stop offset=".5" stop-color="#55555e"/><stop offset="1" stop-color="#1a1a1f"/></linearGradient>
+ <linearGradient id="scr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d8bff"/><stop offset="1" stop-color="#2a3cff"/></linearGradient></defs>
+ <g transform="translate(${540+sh*1.5} 1270) rotate(${Math.sin(t*60)*2.5})"><ellipse cx="0" cy="230" rx="160" ry="22" fill="#000" opacity=".5"/>
+ <rect x="-100" y="-175" width="200" height="350" rx="38" fill="url(#ph)"/><rect x="-86" y="-160" width="172" height="320" rx="28" fill="url(#scr)"/>
+ <rect x="-86" y="-160" width="172" height="320" rx="28" fill="#fff" opacity="${.15+.15*Math.sin(t*20)}"/>
+ <circle cx="92" cy="-165" r="54" fill="#ff2e4d" style="filter:drop-shadow(0 0 18px #ff2e4d)"/><text x="92" y="-148" text-anchor="middle" font-family="M" font-weight="900" font-size="${cnt>9?46:54}" fill="#fff">${cnt>=99?'99+':cnt}</text></g>
+ </svg><div class="a">${b}</div>`+VIG;},
+todo(t){ // todo converge en tu silla: etiquetas de cristal con líneas de luz
+ const items=["FACTURAS","CLIENTES","PEDIDOS","EQUIPO","PRECIOS","COBROS","PROVEEDORES","DECISIONES"];
+ let g='';items.forEach((s,i)=>{const a=i/items.length*Math.PI*2+t*.5, r=640-300*eio(cl((t-.1*i)/1.6)), x=540+Math.cos(a)*r*.75, y=880+Math.sin(a)*r;
+  g+=`<line x1="${x}" y1="${y}" x2="540" y2="900" stroke="#ff9f1c" stroke-width="3" stroke-dasharray="10 14" stroke-dashoffset="${-t*90}" opacity=".7"/>
+  <g transform="translate(${x} ${y})"><rect x="-${s.length*15+30}" y="-40" width="${s.length*30+60}" height="80" rx="40" fill="#ff9f1c" fill-opacity=".14" stroke="#ff9f1c" stroke-width="3"/><text y="15" text-anchor="middle" font-family="M" font-weight="800" font-size="38" letter-spacing="2" fill="#ffd9a6">${s}</text></g>`});
+ const pulse=1+.05*Math.sin(t*8);
+ return studio('#05080f','#13253f','#ff9f1c',t,540,900)+`<svg class="a" width="1080" height="1920">
+ <defs><radialGradient id="hal"><stop offset="0" stop-color="#ff9f1c" stop-opacity=".45"/><stop offset="1" stop-color="#ff9f1c" stop-opacity="0"/></radialGradient></defs>
+ <circle cx="540" cy="900" r="${300*pulse}" fill="url(#hal)"/>${g}
+ <g transform="translate(540 930) scale(${.5*pulse})">${chair('#ff9f1c','#ffb85c')}</g></svg>`+VIG;},
+pregunta(t){ // fondo oscuro con luz azul, interrogación azul con volumen girando
+ const ry=Math.sin(t*1.6)*35, s=.9+.1*ob(cl(t/.5));
+ let ext='';for(let i=1;i<=22;i++)ext+=`${i}px ${i}px 0 hsl(228,100%,${30-i*.8}%),`;
+ return studio('#03040a','#0d1a5c','#1F4BFF',t,540,700)+`
+ <div class="a" style="filter:blur(90px)"><div style="position:absolute;width:620px;height:620px;border-radius:50%;background:#1F4BFF;opacity:.55;left:${230+Math.sin(t)*60}px;top:${360+Math.cos(t*.8)*50}px"></div></div>
+ <div class="a" style="perspective:1400px"><div style="position:absolute;left:0;right:0;top:200px;text-align:center;font-weight:900;font-size:820px;line-height:1;transform:rotateY(${ry}deg) scale(${s});
+  background:linear-gradient(160deg,#cfd9ff 0%,#5b7cff 35%,#1F4BFF 60%,#0a1f9e 100%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(10px 12px 0 #0a1a7a) drop-shadow(18px 22px 0 #050d40) drop-shadow(0 40px 60px #000c)">?</div></div>`+VIG;},
+vasoA(t){ return vaso3d('A',t,`<div style="position:absolute;top:170px;left:0;right:0;text-align:center;font-weight:800;font-size:34px;letter-spacing:8px;color:#8fa6ff">SOSTENIÉNDOLO</div>
+ <div style="position:absolute;top:215px;left:0;right:0;text-align:center;font-weight:900;font-size:150px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 40px #1F4BFF">${clock(t*1.0)}</div>`);},
+vasoB(t){ const sec=Math.pow(t/4.2,2.4)*3600*5+t; const pct=Math.min(100,Math.round(8+t/4.2*92));
+ return vaso3d('B',t,`<div style="position:absolute;top:170px;left:0;right:0;text-align:center;font-weight:800;font-size:34px;letter-spacing:8px;color:${pct>70?'#ff5c6c':'#8fa6ff'}">SOSTENIÉNDOLO</div>
+ <div style="position:absolute;top:215px;left:0;right:0;text-align:center;font-weight:900;font-size:150px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 40px ${pct>70?'#ff2e4d':'#1F4BFF'}">${clock(sec)}</div>
+ <div style="position:absolute;top:420px;left:290px;width:500px;height:14px;border-radius:7px;background:#ffffff22"><div style="height:100%;width:${pct}%;border-radius:7px;background:linear-gradient(90deg,#1F4BFF,${pct>70?'#ff2e4d':'#5b7cff'})"></div></div>
+ <div style="position:absolute;top:446px;left:0;right:0;text-align:center;font-weight:700;font-size:28px;color:#ffffffaa">CANSANCIO ${pct}%</div>`);},
+cargas(t){ // tres problemas pequeños que se quedan
+ const it=[["€","Cliente que","siempre paga tarde","#ff5c6c"],["%","Precio que no tocas","desde hace años","#ffb35c"],["TÚ","Tarea que","solo sabes hacer tú","#5b7cff"]];
+ let h='';it.forEach((x,i)=>{const a=t-i*1.9,p=ob(cl(a/.35));if(a<0)return;const y=330+i*290;
+  h+=`<div style="position:absolute;left:${120+(1-p)*-700}px;top:${y}px;width:840px;height:230px;border-radius:36px;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:2px solid rgba(255,255,255,.18);box-shadow:0 30px 60px #0008, inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;gap:34px;padding-left:44px;box-sizing:border-box">
+   <div style="width:130px;height:130px;border-radius:32px;background:${x[3]}22;border:3px solid ${x[3]};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:56px;color:#fff">${x[0]}</div>
+   <div style="font-weight:800;font-size:44px;line-height:1.15;color:#fff">${x[1]}<br><span style="color:${x[3]}">${x[2]}</span></div></div>`});
+ return studio('#06070b','#191c2a','#8fa6ff',t,540,800)+`<div class="a">${h}</div>`+VIG;},
+tiempo(t){ // hojas de calendario que caen: el problema no es el tamaño, es el tiempo
+ const M=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];const n=Math.floor(Math.pow(t,1.6)*4);
+ const cur=M[n%12], yr=2024+Math.floor(n/12); let fall='';
+ for(let k=1;k<=3;k++){const m=n-k;if(m<0)continue;const ph=cl((Math.pow(t,1.6)*4-m-1)/1.2);
+  fall+=`<div style="position:absolute;left:290px;top:${520+ph*900}px;width:500px;height:560px;border-radius:30px;background:#e9ecf3;transform:rotate(${ph*(k%2?40:-35)}deg);opacity:${1-ph};box-shadow:0 30px 60px #0008"></div>`}
+ return studio('#07060a','#2a1414','#ff5c6c',t,540,850)+`<div class="a">
+ <div style="position:absolute;left:290px;top:520px;width:500px;height:560px;border-radius:30px;background:linear-gradient(#fff,#d9dde6);box-shadow:0 40px 80px #000a;overflow:hidden">
+  <div style="height:150px;background:#ff2e4d;color:#fff;font-weight:900;font-size:84px;text-align:center;line-height:150px;letter-spacing:6px">${cur}</div>
+  <div style="text-align:center;font-weight:900;font-size:230px;color:#0A0A0A;line-height:300px">${yr}</div></div>${fall}</div>`+VIG;},
+soltar(t){ // ponle cifra, decide, suéltalo
+ const st=[["1","Ponle cifra"],["2","Decide"],["3","Suéltalo"]];let h='';
+ st.forEach((x,i)=>{const a=t-.15-i*.75,p=ob(cl(a/.3)),ck=cl((a-.35)/.25);if(a<0)return;
+  h+=`<div style="position:absolute;left:150px;top:${430+i*230}px;width:780px;height:180px;border-radius:90px;background:${ck>0?'#1F4BFF':'rgba(255,255,255,.08)'};border:3px solid #1F4BFF;transform:scale(${.7+.3*p});opacity:${p};display:flex;align-items:center;gap:36px;padding-left:30px;box-sizing:border-box;box-shadow:0 0 ${60*ck}px #1F4BFF88">
+  <div style="width:124px;height:124px;border-radius:50%;background:#fff;color:#1F4BFF;font-weight:900;font-size:64px;display:flex;align-items:center;justify-content:center">${ck>.5?'✓':x[0]}</div>
+  <div style="font-weight:900;font-size:70px;color:#fff">${x[1]}</div></div>`});
+ return studio('#04060d','#0f1d4a','#1F4BFF',t,540,800)+`<div class="a">${h}</div>`+VIG;},
+libreta(t){ // lista del lunes que se va tachando; lo importante se queda sin tachar
+ const L=["Llamar al gestor","Factura proveedor","Presupuesto cliente","Contestar 40 correos","Reunión de equipo","Pensar en mi negocio"];
+ let rows='';L.forEach((x,i)=>{const last=i==L.length-1, a=t-.6-i*.45, cr=last?0:oc(cl(a/.25)), st=!last&&a>.2?ob(cl((a-.2)/.25)):0;
+  rows+=`<div style="position:relative;height:96px;display:flex;align-items:center;font-weight:700;font-size:46px;color:${last?'#1F4BFF':'#1b1d24'};${last?'font-weight:900;':''}">
+   <span style="width:46px;height:46px;border:4px solid #1b1d24;border-radius:10px;margin-right:26px;display:inline-block;flex:none"></span>${x}
+   <div style="position:absolute;left:70px;top:46px;height:7px;width:${cr*560}px;background:#ff2e4d;border-radius:4px;transform:rotate(-1.5deg)"></div>
+   ${st>0?`<div style="position:absolute;right:-20px;top:6px;transform:rotate(-12deg) scale(${st});border:5px solid #ff2e4d;color:#ff2e4d;font-weight:900;font-size:30px;padding:2px 12px;border-radius:8px;opacity:.9">URGENTE</div>`:''}</div>`});
+ const glow=t>3.5?.5+.5*Math.sin(t*6):0;
+ return studio('#07080c','#2a2014','#ffb35c',t,540,900)+`<div class="a">
+ <div style="position:absolute;left:110px;top:${600-Math.sin(t*.8)*6}px;width:880px;height:640px;border-radius:18px;background:repeating-linear-gradient(#fbf8f1 0 95px,#d8dcef 95px 97px);background-position:0 92px;box-shadow:0 50px 90px #000c, 0 0 0 1px #0002;transform:rotate(-2deg);overflow:hidden">
+  <div style="position:absolute;left:84px;top:0;bottom:0;width:3px;background:#ff8a8a"></div>
+  <div style="padding:20px 40px 0 110px">${rows}</div>
+  <div style="position:absolute;left:100px;top:${20+5*96}px;width:700px;height:96px;border-radius:14px;box-shadow:0 0 0 4px rgba(31,75,255,${glow})"></div></div></div>`+VIG;},
+};
+function dm(ct){ // cierre: móvil con el chat de Instagram escribiendo la palabra clave, sobre fondo oscuro con brillo de color
+ const typed=KW.slice(0,Math.floor(cl((ct-.35)/.6)*KW.length+.001)), sent=ct>1.15, sp=oc(cl((ct-1.15)/.3));
+ let conf='';if(sent)for(let i=0;i<50;i++){const a=R(i)*Math.PI*2,v=300+R(i+3)*700,tt=ct-1.15,x=540+Math.cos(a)*v*tt,y=900+Math.sin(a)*v*tt+500*tt*tt;
+  conf+=`<rect x="${x}" y="${y}" width="16" height="26" rx="3" fill="${['#FFE14D','#ffffff','#1F4BFF','#d62976','#fa7e1e'][i%5]}" transform="rotate(${tt*500+i*30} ${x} ${y})"/>`}
+ return `<div class="a" style="background:#050508"></div>
+ <div class="a" style="filter:blur(110px)"><div style="position:absolute;left:120px;top:420px;width:840px;height:900px;border-radius:50%;background:conic-gradient(from ${ct*60}deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5,#feda75);opacity:.55"></div></div>
+ <svg class="a" width="1080" height="1920">
+ <g transform="translate(110 420)"><rect x="-14" y="-14" width="888" height="928" rx="68" fill="#1b1b20" stroke="#3a3a42" stroke-width="4"/><rect width="860" height="900" rx="56" fill="#fff"/>
+ <circle cx="95" cy="95" r="48" fill="#111"/><text x="95" y="112" text-anchor="middle" font-family="M" font-weight="900" font-size="44" fill="#fff">A</text>
+ <text x="170" y="88" font-family="M" font-weight="800" font-size="38" fill="#111">alejandro.segura.asesor</text><text x="170" y="132" font-family="M" font-weight="500" font-size="30" fill="#888">Mensaje</text>
+ <line x1="0" y1="190" x2="860" y2="190" stroke="#eee" stroke-width="4"/>
+ ${sent?`<g transform="translate(${860-60-(KW.length*44+80)} ${560-sp*120})" opacity="${sp}"><rect width="${KW.length*44+80}" height="110" rx="55" fill="#3797f0"/><text x="${(KW.length*44+80)/2}" y="74" text-anchor="middle" font-family="M" font-weight="900" font-size="56" fill="#fff">${KW}</text></g>`:''}
+ <rect x="40" y="760" width="${780}" height="100" rx="50" fill="#f2f2f2" stroke="#ddd" stroke-width="4"/>
+ <text x="90" y="828" font-family="M" font-weight="800" font-size="50" fill="#111">${sent?'':typed}${!sent&&Math.floor(ct*3)%2?'|':''}</text>
+ <circle cx="760" cy="810" r="${38*(1+.15*Math.sin(ct*10))}" fill="#3797f0"/><path d="M742 810 L782 810 M766 794 L782 810 L766 826" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/></g>
+ ${conf}</svg>
+ <div style="position:absolute;left:0;right:0;top:1420px;text-align:center;font-weight:900;font-size:84px;line-height:1.05"><span class="cw">Escríbeme</span><br><span class="cw" style="color:#FFE14D">${KW}</span> <span class="cw">por privado</span></div>`;}
+// ---------- RENDER ----------
+function render(t){
+ const stage=document.getElementById('stage'), cap=document.getElementById('cap'), fl=document.getElementById('flash');
+ let k=0;while(k+1<S.length&&t>=S[k+1].t)k++;
+ const inCta=t>=VEND, st=inCta?VEND:Math.max(0,S[k].t), lt=t-st;
+ const punch=1+.09*(1-oc(cl(lt/.35))), shx=lt<.22?(R(Math.floor(t*60))-.5)*30*(1-lt/.22):0, shy=lt<.22?(R(Math.floor(t*60)+7)-.5)*30*(1-lt/.22):0;
+ stage.style.transform=`translate(${shx}px,${shy}px) scale(${punch+.015*lt})`;
+ stage.innerHTML=inCta?dm(lt):(SC[S[k].scene]||SC.pregunta)(lt);
+ fl.style.opacity=(t>.1?.75:0)*(1-cl(lt/.12));
+ let h='';
+ if(!inCta){let ci=0;while(ci+1<C.length&&t>=C[ci+1].t)ci++;const c=C[ci];
+  const hiCol=['#FFE14D','#3BFF8A','#FFE14D','#FF5C8A'][ci%4], n=c.ws.reduce((a,w)=>a+w.w.length,0), fs=n>13?104:n>9?118:134;
+  
+  const y=(S[k].scene=='silla'||S[k].scene.startsWith('vaso'))?1620:S[k].scene=='pregunta'?1480:S[k].scene=='cerrado'?1000:1430;
+  let ws='';c.ws.forEach((w,j)=>{const p=ob(cl((t-w.t+.04)/.22));if(t<w.t-.04&&j>0)return;
+   ws+=(ws?' ':'')+`<span class="cw" style="color:${w.hi?hiCol:'#fff'};transform:scale(${.5+.5*p}) rotate(${(1-p)*-6}deg);display:inline-block">${w.w}</span>`});
+  h=`<div class="cap" style="top:${y}px;transform:translateY(-50%);font-size:${fs}px">${ws}</div>`}
+ cap.innerHTML=h;
+ 
+ const pr=document.getElementById('prog');pr.style.width=(t/TOTAL*1080)+'px';
+}
+</script></body></html>
