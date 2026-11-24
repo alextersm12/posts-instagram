@@ -32,7 +32,7 @@ body{margin:0;background:#000}
 <div class="bg" id="flash" style="background:#fff;opacity:0"></div>
 </div>
 <script>
-const C=__C__, VEND=__VEND__, TOTAL=__TOTAL__, KW="__KW__", TOPIC="__TOPIC__";
+const C=__C__, VEND=__VEND__, TOTAL=__TOTAL__, KW="__KW__", TOPIC="__TOPIC__", MODE="__MODE__";
 const cl=x=>Math.max(0,Math.min(1,x)), oc=p=>1-Math.pow(1-p,3), ob=p=>{const c1=1.7,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2)};
 function rnd(i){const x=Math.sin(i*12.9898+78.233)*43758.5453;return x-Math.floor(x)}
 const SS=[];C.forEach((c,i)=>{if(!i||C[i-1].sc!=c.sc)SS.push({t:c.t,sc:c.sc})});SS.push({t:VEND,sc:'cta'});
@@ -111,9 +111,9 @@ function render(t){
  } else {
   const ct=t-VEND, m=d=>ob(cl((ct-d)/.35));
   h=`<div style="position:absolute;left:0;right:0;top:520px;text-align:center;font-weight:900;letter-spacing:-.03em;text-shadow:0 12px 40px #0000004d">`+
-  `<div style="font-size:110px;transform:scale(${m(0)})">Escríbeme</div>`+
+  `<div style="font-size:110px;transform:scale(${m(0)})">${MODE=='c'?'Comenta':'Escríbeme'}</div>`+
   `<div style="display:inline-block;margin:24px 0;font-size:170px;padding:0 .25em .06em;border-radius:.16em;background:linear-gradient(135deg,#ffffff2e,#ffffff0d);border:3px solid #5B7BFF;box-shadow:0 0 60px #1F4BFF99;color:#fff;transform:rotate(-2deg) scale(${m(.15)*(1+.04*Math.sin(ct*8))})">${KW}</div>`+
-  `<div style="font-size:110px;transform:scale(${m(.3)})">por privado</div></div>`;
+  `<div style="font-size:110px;transform:scale(${m(.3)})">${MODE=='c'?'aquí abajo':'por privado'}</div></div>`;
   const a=oc(cl((ct-.5)/.4)),bob=Math.sin(ct*6)*16;
   h+=`<svg width="140" height="260" style="position:absolute;left:470px;top:${1240+bob}px;opacity:${a}"><path d="M70 10 L70 230 M25 190 L70 240 L115 190" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
  }
@@ -170,7 +170,7 @@ def sfx(C, total, vend):
 def page(rid):
     C, audio, vend, total = V3.build(rid)
     html = (HTML.replace("__F__", F).replace("__C__", json.dumps(C, ensure_ascii=False)).replace("__VEND__", str(vend))
-            .replace("__TOTAL__", str(total)).replace("__KW__", V3.KW[rid[:2]]).replace("__TOPIC__", rid[:2]))
+            .replace("__TOTAL__", str(total)).replace("__KW__", V3.KW[rid[:2]]).replace("__TOPIC__", rid[:2]).replace("__MODE__", "c" if rid in V3.ALIAS and V3.ALIAS[rid][1].endswith("C") else "p"))
     return C, audio, vend, total, html
 
 

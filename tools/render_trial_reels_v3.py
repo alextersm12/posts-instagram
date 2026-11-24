@@ -29,6 +29,8 @@ SAY = {
     "t2d": "¿Cuánto te queda limpio de cada venta?",
     "t3c": "Lunes, 9 de la mañana: ¿qué es lo primero que haces?",
     "t3d": "Si todo es urgente… ¿qué haces primero?",
+    "t1g": "¿Cuántas horas trabajas en cosas que podría hacer otro?",
+    "t1-ctaC": "¿Qué sería lo primero que soltarías? Coméntame «tiempo».",
     "t1b": "Si todo pasa por ti, tu negocio no es libre. Y tú tampoco.",
     "t1-line": "Presupuestos. Quejas. Pagos. Todo te espera a ti.",
     "t1-turn": "No es falta de tiempo. Es falta de orden.",
@@ -47,8 +49,10 @@ SAY = {
     "t3-list": "Entender, priorizar, decidir. Escribe todo lo pendiente. Quédate con tres: lo que da dinero o libera tiempo. Y lo demás, a la semana que viene.",
     "t3-cta": "¿Cuál es tu prioridad número uno esta semana? Escríbeme «orden» por privado.",
 }
+# variantes de cierre: rid -> (gancho, clave del cierre). "C" = comentar en vez de privado
+ALIAS = {"t1gc": ("t1g", "t1-ctaC")}
 KW = {"t1": "TIEMPO", "t2": "MARGEN", "t3": "ORDEN"}
-HI = {"vacaciones", "decide", "españa", "horas", "así", "va", "semana", "malo", "abre", "tú", "perder", "limpio", "venta", "lunes", "primero", "pare", "libre", "tampoco", "todo", "tiempo", "orden", "uno", "dos", "tres", "soltarías",
+HI = {"vacaciones", "decide", "otro", "trabajas", "españa", "horas", "así", "va", "semana", "malo", "abre", "tú", "perder", "limpio", "venta", "lunes", "primero", "pare", "libre", "tampoco", "todo", "tiempo", "orden", "uno", "dos", "tres", "soltarías",
       "vendes", "mismo", "ganar", "horas", "costes", "descuentos", "entra", "queda", "margen", "cliente",
       "descuento", "más", "urgente", "nada", "elegir", "avanzar", "pendiente", "dinero", "decidir",
       "priorizar", "entender", "prioridad", "persona", "proceso", "ti", "pagos", "quejas", "presupuestos"}
@@ -97,7 +101,8 @@ def word_times(text, segs):
 
 
 def build(rid):
-    keys = [rid] + [f"{rid[:2]}-{k}" for k in ("line", "turn", "list", "cta")]
+    hook, cta = ALIAS.get(rid, (rid, f"{rid[:2]}-cta"))
+    keys = [hook] + [f"{rid[:2]}-{k}" for k in ("line", "turn", "list")] + [cta]
     audio, words, t = [], [], .15
     os.makedirs(f"{WORK}/{rid}", exist_ok=True)
     for k in keys:
@@ -109,7 +114,7 @@ def build(rid):
         a0, b1 = segs[0][0], segs[-1][1]
         audio.append((t - a0, x))
         for wt, w in word_times(SAY[k], segs):
-            words.append([round(t + wt - a0, 3), w, k.split("-")[-1] if "-" in k else "hook"])
+            words.append([round(t + wt - a0, 3), w, ("cta" if k.split("-")[-1].startswith("cta") else k.split("-")[-1]) if "-" in k else "hook"])
         t += b1 - a0 + GAP
     voice_end = t
     # trozos de 1-3 palabras: corta en puntuación o cada 3 palabras / 16 letras
@@ -130,7 +135,7 @@ def build(rid):
     return C, audio, voice_end, voice_end + CTA_HOLD
 
 
-BIG = {"t1": {"a": "?", "b": "TÚ", "c": "?", "d": "TÚ", "e": "15", "f": "HORAS", "line": "TODO", "turn": "ORDEN", "list": "1·2·3", "cta": "TIEMPO"},
+BIG = {"t1": {"a": "?", "b": "TÚ", "c": "?", "d": "TÚ", "e": "15", "f": "HORAS", "g": "?", "line": "TODO", "turn": "ORDEN", "list": "1·2·3", "cta": "TIEMPO"},
        "t2": {"a": "?", "b": "+€", "c": "€", "d": "€", "line": "MÁS", "turn": "MARGEN", "list": "1·2·3", "cta": "MARGEN"},
        "t3": {"a": "?", "b": "TODO", "c": "9:00", "d": "?", "line": "URGENTE", "turn": "ELEGIR", "list": "1·2·3", "cta": "ORDEN"}}
 
