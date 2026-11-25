@@ -50,7 +50,7 @@ SAY = {
     "t3-cta": "¿Cuál es tu prioridad número uno esta semana? Escríbeme «orden» por privado.",
 }
 # variantes de cierre: rid -> (gancho, clave del cierre). "C" = comentar en vez de privado
-ALIAS = {"t1gc": ("t1g", "t1-ctaC")}
+ALIAS = {"t1gc": ("t1g", "t1-ctaC"), "t1dc": ("t1d", "t1-ctaC")}
 KW = {"t1": "TIEMPO", "t2": "MARGEN", "t3": "ORDEN"}
 HI = {"vacaciones", "decide", "otro", "trabajas", "españa", "horas", "así", "va", "semana", "malo", "abre", "tú", "perder", "limpio", "venta", "lunes", "primero", "pare", "libre", "tampoco", "todo", "tiempo", "orden", "uno", "dos", "tres", "soltarías",
       "vendes", "mismo", "ganar", "horas", "costes", "descuentos", "entra", "queda", "margen", "cliente",
